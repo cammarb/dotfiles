@@ -21,6 +21,7 @@ config.enable_tab_bar = false
 
 config.font = wezterm.font('Fira Code')
 config.font_size = 14
+config.window_decorations = "TITLE | RESIZE"
 
 -- and finally, return the configuration to wezterm
 return config
