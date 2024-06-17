@@ -46,7 +46,7 @@ packages=(
   "git"
   "curl"
   "zsh"
-  "nvim"
+  "neovim"
   "tmux"
   "gh"
 )
