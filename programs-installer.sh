@@ -73,6 +73,19 @@ echo "Installing External Packages and plugins..."
 
 echo -e "${BLUE}Installing Oh-My-Zh..${ENDCOLOR}"
 exit 0 | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+echo -e "${BLUE}Removing default .zshrc file"
+ZSHRC_FILE="$HOME/.zshrc"
+if [ -f "$ZSHRC_FILE" ]; then
+  rm "$ZSHRC_FILE"
+  if [ $? -eq 0 ]; then
+    echo -e "${GREEN}.zshrc file has been successfully deleted.${ENDCOLOR}"
+  else
+    echo -e "${RED}Failed to delete .zshrc file.${ENDCOLOR}"
+    exit 1
+  fi
+else
+  echo -e "${BLUE}.zshrc file does not exist.${ENDCOLOR}"
+fi
 
 echo -e "${BLUE}Installing nvm (Node Version Manager)...${ENDCOLOR}"
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
