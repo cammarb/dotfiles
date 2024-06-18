@@ -45,6 +45,7 @@ packages=(
   "build-essential"
   "git"
   "curl"
+  "stow"
   "zsh"
   "neovim"
   "tmux"
@@ -71,10 +72,7 @@ EOF
 echo "Installing External Packages and plugins..."
 
 echo -e "${BLUE}Installing Oh-My-Zh..${ENDCOLOR}"
-echo -e "${BLUE}Before installing Oh-My-Zsh, please press 'y' when prompted to set zsh as the default shell.${ENDCOLOR}"
-echo -e "${BLUE}After installation, type 'exit' and press Enter to continue.${ENDCOLOR}"
-read -p "Press Enter to continue..."
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+exit 0 | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 echo -e "${BLUE}Installing nvm (Node Version Manager)...${ENDCOLOR}"
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
@@ -96,3 +94,35 @@ if [ $? -ne 0 ]; then
     echo -e "${RED}Error: Installing Node.JS failed.${ENDCOLOR}"
     exit 1
 fi
+
+echo -e "${BLUE}Changing default shell to zsh...${ENDCOLOR}"
+echo -e "You might need to enter your password to make these changes."
+read -p "Press Enter to continue..."
+chsh -s $(which zsh)
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Changing shell to zsh failed.${ENDCOLOR}"
+    exit 1
+fi
+
+cat << EOF
+${GREEN}
+DONE:
+External packages installed successfully.${ENDCOLOR}
+
+EOF
+
+
+echo -e "${BLUE}Initializing stow for every folder in the current directory...${ENDCOLOR}"
+
+for dir in */ ; do
+  if [ -d "$dir" ]; then
+    dir=${dir%/}
+    echo -e "${BLUE}Running stow for directory: $dir${ENDCOLOR}"
+    stow "$dir"
+  fi
+done
+
+echo -e "${BLUE}Stow initialization complete for all directories.${ENDCOLOR}"
+
+echo -e "For all of your configuration to take effect close and reopen your terminal."
+read -p "Press Enter to finish."
