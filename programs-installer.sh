@@ -22,9 +22,9 @@ echo -e "${YELLOW}Starting Programs Installer...${ENDCOLOR}"
 cat << EOF
 Updating package list...
 
-${LIGHT_RED}WARNING${ENDCOLOR}: You might have to enter your password to proceed.
 EOF
 
+echo -e "${LIGHT_RED}WARNING${ENDCOLOR}: You might have to enter your password to proceed."
 echo ""
 sudo apt update -y
 if [ $? -ne 0 ]; then
@@ -62,12 +62,8 @@ for package in "${packages[@]}"; do
   install_package "$package"
 done
 
-cat << EOF
-${GREEN}
-DONE:
-Packages installed successfully.${ENDCOLOR}
-
-EOF
+echo -e "${GREEN}DONE: Packages installed successfully.${ENDCOLOR}"
+echo -e ""
 
 echo "Installing External Packages and plugins..."
 
@@ -86,6 +82,14 @@ if [ -f "$ZSHRC_FILE" ]; then
 else
   echo -e "${BLUE}.zshrc file does not exist.${ENDCOLOR}"
 fi
+
+echo -e "${BLUE}Installing zsh-autosuggestions..."
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Installing zsh-autosuggestions failed.${ENDCOLOR}"
+    exit 1
+fi
+
 
 echo -e "${BLUE}Installing nvm (Node Version Manager)...${ENDCOLOR}"
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
@@ -117,16 +121,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-cat << EOF
-${GREEN}
-DONE:
-External packages installed successfully.${ENDCOLOR}
-
-EOF
-
+echo -e "${GREEN}DONE:External packages installed successfully.${ENDCOLOR}"
+echo ""
 
 echo -e "${BLUE}Initializing stow for every folder in the current directory...${ENDCOLOR}"
-
 for dir in */ ; do
   if [ -d "$dir" ]; then
     dir=${dir%/}
@@ -134,8 +132,7 @@ for dir in */ ; do
     stow "$dir"
   fi
 done
-
-echo -e "${BLUE}Stow initialization complete for all directories.${ENDCOLOR}"
+echo -e "${GREEN}Stow initialization complete for all directories.${ENDCOLOR}"
 
 echo -e "For all of your configuration to take effect close and reopen your terminal."
-read -p "Press Enter to finish."
+read -p "Press Enter to finish..."
