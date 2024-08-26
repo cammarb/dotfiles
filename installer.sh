@@ -50,6 +50,8 @@ packages=(
   "neovim"
   "tmux"
   "gh"
+  "sway"
+  "tofi"
 )
 
 install_package(){
