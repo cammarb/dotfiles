@@ -134,5 +134,5 @@ for dir in */ ; do
 done
 echo -e "${GREEN}Stow initialization complete for all directories.${ENDCOLOR}"
 
-echo -e "For all of your configuration to take effect close and reopen your terminal."
+echo -e "For all of your configuration to take effect you'll have to log out and log in again."
 read -p "Press Enter to finish..."
