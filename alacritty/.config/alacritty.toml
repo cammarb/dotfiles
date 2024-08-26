@@ -1,6 +1,8 @@
+[env]
+TERM = "xterm-256color"
+
 [window]
 padding = { x = 10, y = 10 }
 
 [font]
-size = 14
-normal = { family = "Cascadia Code", style = "Regular" }
+size = 12
