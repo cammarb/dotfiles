@@ -40,11 +40,15 @@ echo -e "@cammarb\n\n"
 
 # Setup installer for a specific distro
 DEFAULT_DISTRO="ubuntu"
-VALID_VALUES=("ubuntu" "fedora" "wsl2")
+VALID_DISTROS=(
+  "ubuntu"
+  "fedora"
+  "wsl2"
+)
 
 is_valid_value() {
   local value="$1"
-  for valid in "${VALID_VALUES[@]}"; do
+  for valid in "${VALID_DISTROS[@]}"; do
     if [[ "$value" == "$valid" ]]; then
       return 0
     fi
@@ -52,11 +56,11 @@ is_valid_value() {
   return 1
 }
 
-DISTRO="${1:-$DEFAULT_VALUE}"
+DISTRO="${1:-$DEFAULT_DISTRO}"
 
 if ! is_valid_value "$DISTRO"; then
-  echo -e "${RED}Invalid distro provided. Using default: $DEFAULT_VALUE${ENDCOLOR}"
-  DISTRO="$DEFAULT_VALUE"
+  echo -e "${RED}Invalid distro provided. Using default: $DEFAULT_DISTRO${ENDCOLOR}"
+  DISTRO="$DEFAULT_DISTRO"
 fi
 
 echo -e "${GREEN}Using distro: $DISTRO${ENDCOLOR}"
@@ -77,15 +81,15 @@ EOF
 echo -e "${LIGHT_RED}WARNING${ENDCOLOR}: You might have to enter your password to proceed."
 
 if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "wsl2" ]]; then
-  sudo apt update -y
+  sudo apt-get update -y
   if [ $? -ne 0 ]; then
-      echo -e "${RED}Error: apt update failed.${ENDCOLOR}"
+      echo -e "${RED}Error: apt-get update failed.${ENDCOLOR}"
       exit 1
   fi
 
-  sudo apt upgrade -y
+  sudo apt-get upgrade -y
   if [ $? -ne 0 ]; then
-      echo -e "${RED}Error: apt upgrade failed.${ENDCOLOR}"
+      echo -e "${RED}Error: apt-get upgrade failed.${ENDCOLOR}"
       exit 1
   fi
 elif [[ "$DISTRO" == "fedora" ]]; then
@@ -134,7 +138,7 @@ install_package(){
   if [[ "$DISTRO" == "fedora" ]]; then
     sudo dnf install -y $1
   else
-    sudo apt install -y $1
+    sudo apt-get install -y $1
   fi
   if [ $? -ne 0 ]; then
     echo -e "${RED}Error: Installation of $1 failed.${ENDCOLOR}"
@@ -205,6 +209,18 @@ fi
 
 echo -e "${GREEN}DONE${ENDCOLOR}: External packages installed successfully.\n"
 
+
+# Clone repo with configuration
+echo -e "Cloning configuration files from https://github.com/cammarb/dotfiles"
+git clone https://github.com/cammarb/dotfiles
+cd dotfiles
+
+# Copy wallpaper image to corresponding directory.
+# This wallpaper is set in the sway configuration,
+# so if this is missing, sway will throw an error.
+if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "fedora" ]]; then
+  mkdir -p ~/Pictures/wallpapers
+  cp wallpapers/penguin_smiling.jpg -r ~/Pictures/wallpapers/
 
 stow_dirs=("git" "nvim" "tmux" "zsh")
 graphical_stow_dirs=("alacritty" "sway" "tofi")
