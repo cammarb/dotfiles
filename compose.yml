@@ -6,5 +6,4 @@ services:
         volumes:
             - .:/workspace
         command: >
-            /bin/bash -c " apt-get update -y && apt-get upgrade -y && apt-get install -y sudo curl && tail -f /dev/null"
-        # curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cammarb/dotfiles/main/installer.sh | bash -s -- wsl
+            /bin/bash -c " apt-get update -y && apt-get upgrade -y && apt-get install -y sudo curl && curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cammarb/dotfiles/main/installer.sh | bash -s -- wsl2 && tail -f /dev/null"
