@@ -1,5 +1,26 @@
 #!/bin/bash
 
+# =============================================================================
+# Script Name: installer.sh
+# Description: This script installs software and my dotfiles for the specified
+#              environment. 
+#              The script accepts predefined values: 'ubuntu', 'fedora', and 
+#              'wsl2'. 
+#              If no argument is provided or if the argument is invalid, it 
+#              defaults to 'ubuntu'.
+#
+# Usage:
+#   ./installer.sh [value]
+#
+# Arguments:
+#   value   - A string representing the environment. Valid values are 
+#             'ubuntu', 'fedora', and 'wsl2'.
+#
+# Example:
+#   ./installer.sh fedora
+# =============================================================================
+
+
 # Console colors
 RED="\e[31m"
 LIGHT_RED="\e[91m"
@@ -9,6 +30,38 @@ MAGENTA="\e[35m"
 YELLOW="\e[33m"
 ENDCOLOR="\e[0m"
 
+# Banner
+echo -e "${RED}     _       _    __ _ _"
+echo -e "${LIGHT_RED}  __| | ___ | |_ / _(_) | ___  ___"
+echo -e "${YELLOW} / _\` |/ _ \\| __| |_| | |/ _ \\/ __|"
+echo -e "${GREEN}| (_| | (_) | |_|  _| | |  __/\\__ \\"
+echo -e "${BLUE} \\__,_|\\___/ \\__|_| |_|_|\\___||___/ ${ENDCOLOR}installer\n"
+echo -e "@cammarb\n\n"
+
+# Setup installer for a specific distro
+DEFAULT_DISTRO="ubuntu"
+VALID_VALUES=("ubuntu" "fedora" "wsl2")
+
+is_valid_value() {
+  local value="$1"
+  for valid in "${VALID_VALUES[@]}"; do
+    if [[ "$value" == "$valid" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+DISTRO="${1:-$DEFAULT_VALUE}"
+
+if ! is_valid_value "$DISTRO"; then
+  echo -e "${RED}Invalid distro provided. Using default: $DEFAULT_VALUE${ENDCOLOR}"
+  DISTRO="$DEFAULT_VALUE"
+fi
+
+echo -e "${GREEN}Using distro: $DISTRO${ENDCOLOR}"
+
+
 check_exit_status(){
   if [ $? -ne 0 ]; then
         echo -e "${RED}Error: $1 failed to install.${ENDCOLOR}"
@@ -16,56 +69,84 @@ check_exit_status(){
     fi
 }
 
-echo -e "${YELLOW}Starting Programs Installer...${ENDCOLOR}"
-
 # Update and upgrade the system
 cat << EOF
 Updating package list...
-
 EOF
 
 echo -e "${LIGHT_RED}WARNING${ENDCOLOR}: You might have to enter your password to proceed."
-echo ""
-sudo apt update -y
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: apt update failed.${ENDCOLOR}"
-    exit 1
-fi
 
-sudo apt upgrade -y
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: apt upgrade failed.${ENDCOLOR}"
-    exit 1
+if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "wsl2" ]]; then
+  sudo apt update -y
+  if [ $? -ne 0 ]; then
+      echo -e "${RED}Error: apt update failed.${ENDCOLOR}"
+      exit 1
+  fi
+
+  sudo apt upgrade -y
+  if [ $? -ne 0 ]; then
+      echo -e "${RED}Error: apt upgrade failed.${ENDCOLOR}"
+      exit 1
+  fi
+elif [[ "$DISTRO" == "fedora" ]]; then
+  sudo dnf update -y
+  if [ $? -ne 0 ]; then
+      echo -e "${RED}Error: dnf update failed.${ENDCOLOR}"
+      exit 1
+  fi
+
+  sudo dnf upgrade -y
+  if [ $? -ne 0 ]; then
+      echo -e "${RED}Error: dnf upgrade failed.${ENDCOLOR}"
+      exit 1
+  fi
 fi
 
 echo ""
 echo "Installing Packages..."
 
 packages=(
-  "build-essential"
+  "stow"
   "git"
   "curl"
-  "stow"
+  "build-essential"
   "zsh"
   "neovim"
+  "ripgrep"
   "tmux"
   "gh"
+)
+
+graphical_packages=(
+  "alacritty"
   "sway"
   "tofi"
 )
 
+if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "fedora" ]]; then
+  packages=("${packages[@]}" "${graphical_packages[@]}")
+elif [[ "$DISTRO" == "wsl2" ]]; then
+  packages=("${packages[@]}")
+fi
+
 install_package(){
   echo -e "${BLUE}Installing $1...${ENDCOLOR}"
-  sudo apt install -y $1
-  check_exit_status "$1"
+  if [[ "$DISTRO" == "fedora" ]]; then
+    sudo dnf install -y $1
+  else
+    sudo apt install -y $1
+  fi
+  if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Installation of $1 failed.${ENDCOLOR}"
+    exit 1
+  fi
 }
 
 for package in "${packages[@]}"; do
   install_package "$package"
 done
 
-echo -e "${GREEN}DONE: Packages installed successfully.${ENDCOLOR}"
-echo -e ""
+echo -e "${GREEN}DONE: Packages installed successfully.${ENDCOLOR}\n"
 
 echo "Installing External Packages and plugins..."
 
@@ -92,7 +173,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-
 echo -e "${BLUE}Installing nvm (Node Version Manager)...${ENDCOLOR}"
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 if [ $? -ne 0 ]; then
@@ -114,7 +194,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo -e "${BLUE}Changing default shell to zsh...${ENDCOLOR}"
+echo -e "${BLUE}Changing default shell to zsh:${ENDCOLOR}"
 echo -e "You might need to enter your password to make these changes."
 read -p "Press Enter to continue..."
 chsh -s $(which zsh)
@@ -123,18 +203,41 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo -e "${GREEN}DONE:External packages installed successfully.${ENDCOLOR}"
-echo ""
+echo -e "${GREEN}DONE${ENDCOLOR}: External packages installed successfully.\n"
 
-echo -e "${BLUE}Initializing stow for every folder in the current directory...${ENDCOLOR}"
-for dir in */ ; do
+
+stow_dirs=("git" "nvim" "tmux" "zsh")
+graphical_stow_dirs=("alacritty" "sway" "tofi")
+
+for dir in "${stow_dirs[@]}"; do
   if [ -d "$dir" ]; then
-    dir=${dir%/}
     echo -e "${BLUE}Running stow for directory: $dir${ENDCOLOR}"
     stow "$dir"
+    if [ $? -ne 0 ]; then
+      echo -e "${RED}Error: stow operation for $dir failed.${ENDCOLOR}"
+      exit 1
+    fi
+  else
+    echo -e "${RED}Directory $dir does not exist.${ENDCOLOR}"
   fi
 done
-echo -e "${GREEN}Stow initialization complete for all directories.${ENDCOLOR}"
+
+# If the distro is Ubuntu or Fedora, apply stow for graphical directories
+if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "fedora" ]]; then
+  for dir in "${graphical_stow_dirs[@]}"; do
+    if [ -d "$dir" ]; then
+      echo -e "${BLUE}Running stow for graphical directory: $dir${ENDCOLOR}"
+      stow "$dir"
+      if [ $? -ne 0 ]; then
+        echo -e "${RED}Error: stow operation for $dir failed.${ENDCOLOR}"
+        exit 1
+      fi
+    else
+      echo -e "${RED}Graphical directory $dir does not exist.${ENDCOLOR}"
+    fi
+  done
+fi
+echo -e "${GREEN}Stow initialization complete.${ENDCOLOR}"
 
 echo -e "For all of your configuration to take effect you'll have to log out and log in again."
 read -p "Press Enter to finish..."
