@@ -118,7 +118,6 @@ packages=(
   "neovim"
   "ripgrep"
   "tmux"
-  "gh"
 )
 
 graphical_packages=(
@@ -198,15 +197,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo -e "${BLUE}Changing default shell to zsh:${ENDCOLOR}"
-echo -e "You might need to enter your password to make these changes."
-read -p "Press Enter to continue..."
-chsh -s $(which zsh)
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: Changing shell to zsh failed.${ENDCOLOR}"
-    exit 1
-fi
-
 echo -e "${GREEN}DONE${ENDCOLOR}: External packages installed successfully.\n"
 
 
@@ -254,6 +244,15 @@ if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "fedora" ]]; then
   done
 fi
 echo -e "${GREEN}Stow initialization complete.${ENDCOLOR}"
+
+# Set zsh as default shell
+echo -e "${BLUE}Changing default shell to zsh:${ENDCOLOR}"
+echo -e "You might need to enter your password to make these changes."
+chsh -s $(which zsh)
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Changing shell to zsh failed.${ENDCOLOR}"
+    exit 1
+fi
 
 echo -e "For all of your configuration to take effect you'll have to log out and log in again."
 read -p "Press Enter to finish..."

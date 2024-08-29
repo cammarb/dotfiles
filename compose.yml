@@ -5,4 +5,9 @@ services:
         tty: true
         volumes:
             - .:/workspace
-        command: /bin/bash -c "apt-get update && apt-get install -y sudo curl && curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cammarb/dotfiles/main/installer.sh | bash"
+    command: |
+        /bin/bash -c "
+        apt-get update &&
+        apt-get upgrade &&
+        apt-get install -y sudo curl &&
+        curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cammarb/dotfiles/main/installer.sh | bash -s -- wsl"
