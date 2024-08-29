@@ -255,4 +255,3 @@ if [ $? -ne 0 ]; then
 fi
 
 echo -e "For all of your configuration to take effect you'll have to log out and log in again."
-read -p "Press Enter to finish..."
