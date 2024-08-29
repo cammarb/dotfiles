@@ -39,7 +39,7 @@ echo -e "${BLUE} \\__,_|\\___/ \\__|_| |_|_|\\___||___/ ${ENDCOLOR}installer\n"
 echo -e "@cammarb\n\n"
 
 # Setup installer for a specific distro
-DEFAULT_DISTRO="ubuntu"
+DEFAULT_DISTRO="wsl2"
 VALID_DISTROS=(
   "ubuntu"
   "fedora"
