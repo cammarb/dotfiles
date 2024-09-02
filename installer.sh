@@ -113,6 +113,7 @@ packages=(
   "stow"
   "git"
   "curl"
+  "tree"
   "build-essential"
   "zsh"
   "neovim"
