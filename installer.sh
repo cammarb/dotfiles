@@ -4,8 +4,8 @@
 # Script Name: installer.sh
 # Description: This script installs software and my dotfiles for the specified
 #              environment. 
-#              The script accepts predefined values: 'ubuntu', 'fedora', and 
-#              'wsl2'. 
+#              The script accepts predefined values: 'ubuntu', 'fedora', 'arch'
+#              and 'wsl2'. 
 #              If no argument is provided or if the argument is invalid, it 
 #              defaults to 'ubuntu'.
 #
@@ -14,7 +14,7 @@
 #
 # Arguments:
 #   value   - A string representing the environment. Valid values are 
-#             'ubuntu', 'fedora', and 'wsl2'.
+#             'ubuntu', 'fedora', 'arch' and 'wsl2'.
 #
 # Example:
 #   ./installer.sh fedora
@@ -43,6 +43,7 @@ DEFAULT_DISTRO="wsl2"
 VALID_DISTROS=(
   "ubuntu"
   "fedora"
+  "arch"
   "wsl2"
 )
 
@@ -124,7 +125,8 @@ packages=(
 graphical_packages=(
   "alacritty"
   "sway"
-  "tofi"
+  "wmenu"
+  "wl-clipboard"
 )
 
 if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "fedora" ]]; then
@@ -137,6 +139,8 @@ install_package(){
   echo -e "${BLUE}Installing $1...${ENDCOLOR}"
   if [[ "$DISTRO" == "fedora" ]]; then
     sudo dnf install -y $1
+  elif [["$DISTRO" == "arch"]]; then  
+    sudo pacman -S -y $1
   else
     sudo apt-get install -y $1
   fi
@@ -201,11 +205,6 @@ fi
 echo -e "${GREEN}DONE${ENDCOLOR}: External packages installed successfully.\n"
 
 
-# Clone repo with configuration
-echo -e "Cloning configuration files from https://github.com/cammarb/dotfiles"
-git clone https://github.com/cammarb/dotfiles
-cd dotfiles
-
 # Copy wallpaper image to corresponding directory.
 # This wallpaper is set in the sway configuration,
 # so if this is missing, sway will throw an error.
@@ -214,7 +213,7 @@ if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "fedora" ]]; then
   cp wallpapers/penguin_smiling.jpg -r ~/Pictures/wallpapers/
 
 stow_dirs=("git" "nvim" "tmux" "zsh")
-graphical_stow_dirs=("alacritty" "sway" "tofi")
+graphical_stow_dirs=("alacritty" "sway")
 
 for dir in "${stow_dirs[@]}"; do
   if [ -d "$dir" ]; then
@@ -230,7 +229,7 @@ for dir in "${stow_dirs[@]}"; do
 done
 
 # If the distro is Ubuntu or Fedora, apply stow for graphical directories
-if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "fedora" ]]; then
+if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "fedora" || "$DISTRO" == "arch"]]; then
   for dir in "${graphical_stow_dirs[@]}"; do
     if [ -d "$dir" ]; then
       echo -e "${BLUE}Running stow for graphical directory: $dir${ENDCOLOR}"
