@@ -6,3 +6,7 @@ padding = { x = 10, y = 10 }
 
 [font]
 size = 12
+offset.y = 2
+
+[font.normal]
+family = "Cascadia Mono"
