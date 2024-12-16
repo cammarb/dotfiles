@@ -4,8 +4,7 @@
 # Script Name: installer.sh
 # Description: This script installs software and my dotfiles for the specified
 #              environment. 
-#              The script accepts predefined values: 'ubuntu', 'fedora', 'arch'
-#              and 'wsl2'. 
+#              The script accepts predefined values: 'ubuntu', 'fedora', 'arch' 
 #              If no argument is provided or if the argument is invalid, it 
 #              defaults to 'ubuntu'.
 #
@@ -14,7 +13,7 @@
 #
 # Arguments:
 #   value   - A string representing the environment. Valid values are 
-#             'ubuntu', 'fedora', 'arch' and 'wsl2'.
+#             'ubuntu', 'fedora', 'arch'.
 #
 # Example:
 #   ./installer.sh fedora
@@ -39,15 +38,14 @@ echo -e "${BLUE} \\__,_|\\___/ \\__|_| |_|_|\\___||___/ ${ENDCOLOR}installer\n"
 echo -e "@cammarb\n\n"
 
 # Setup installer for a specific distro
-DEFAULT_DISTRO="wsl2"
+DEFAULT_DISTRO="ubuntu"
 VALID_DISTROS=(
   "ubuntu"
   "fedora"
   "arch"
-  "wsl2"
 )
 
-is_valid_value() {
+is_valid_distro() {
   local value="$1"
   for valid in "${VALID_DISTROS[@]}"; do
     if [[ "$value" == "$valid" ]]; then
@@ -59,18 +57,52 @@ is_valid_value() {
 
 DISTRO="${1:-$DEFAULT_DISTRO}"
 
-if ! is_valid_value "$DISTRO"; then
-  echo -e "${RED}Invalid distro provided. Using default: $DEFAULT_DISTRO${ENDCOLOR}"
-  DISTRO="$DEFAULT_DISTRO"
+if ! is_valid_distro "$DISTRO"; then
+  echo -e "${RED}Invalid distro provided."
+  exit 1
+elif [[ -z "$1" ]]; then
+  DISTRO=$DEFAULT_DISTRO
+  echo -e "${YELLOW}No distro provided. Using default: $DEFAULT_DISTRO${ENDCOLOR}"
+  echo "Log: No distro provided. Defaulting to $DEFAULT_DISTRO." >> script.log
 fi
 
 echo -e "${GREEN}Using distro: $DISTRO${ENDCOLOR}"
 
+is_graphical() {
+  local value="$1"
+  if [[ "$value" == "true" || "$value" == "false" ]]; then
+    return 0
+  fi
+  return 1
+}
+
+GRAPHICS="${GRAPHICS:-false}"
+
+if ! is_graphical "$GRAPHICS"; then
+  echo -e "${RED}Invalid graphics value provided.${ENDCOLOR}"
+  exit 1
+elif [[ -z "$2" ]]; then
+  echo -e "${YELLOW}No graphics value provided. Using default: $GRAPHICS${ENDCOLOR}"
+else
+  $GRAPHICS=true
+  echo -e "${YELLOW}No graphics value provided. Using default: $GRAPHICS${ENDCOLOR}"
+fi
+
+if ! is_valid_distro "$DISTRO"; then
+  echo -e "${RED}Invalid distro provided."
+  exit 1
+elif [[ -z "$1" ]]; then
+  DISTRO=$DEFAULT_DISTRO
+  echo -e "${YELLOW}No distro provided. Using default: $DEFAULT_DISTRO${ENDCOLOR}"
+  echo "Log: No distro provided. Defaulting to $DEFAULT_DISTRO." >> script.log
+fi
+
+echo -e "Install with graphical apps: ${YELLOW}$GRAPHICS${ENDCOLOR}"
 
 check_exit_status(){
   if [ $? -ne 0 ]; then
-        echo -e "${RED}Error: $1 failed to install.${ENDCOLOR}"
-        exit 1
+      echo -e "${RED}Error: $1 failed to install.${ENDCOLOR}"
+      exit 1
     fi
 }
 
@@ -81,7 +113,7 @@ EOF
 
 echo -e "${LIGHT_RED}WARNING${ENDCOLOR}: You might have to enter your password to proceed."
 
-if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "wsl2" ]]; then
+if [[ $DISTRO == "ubuntu" ]]; then
   sudo apt-get update -y
   if [ $? -ne 0 ]; then
       echo -e "${RED}Error: apt-get update failed.${ENDCOLOR}"
@@ -93,7 +125,7 @@ if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "wsl2" ]]; then
       echo -e "${RED}Error: apt-get upgrade failed.${ENDCOLOR}"
       exit 1
   fi
-elif [[ "$DISTRO" == "fedora" ]]; then
+elif [[ $DISTRO == "fedora" ]]; then
   sudo dnf update -y
   if [ $? -ne 0 ]; then
       echo -e "${RED}Error: dnf update failed.${ENDCOLOR}"
@@ -129,10 +161,8 @@ graphical_packages=(
   "wl-clipboard"
 )
 
-if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "fedora" ]]; then
+if [[ $GRAPHICS == true ]]; then
   packages=("${packages[@]}" "${graphical_packages[@]}")
-elif [[ "$DISTRO" == "wsl2" ]]; then
-  packages=("${packages[@]}")
 fi
 
 install_package(){
@@ -156,10 +186,7 @@ done
 
 echo -e "${GREEN}DONE: Packages installed successfully.${ENDCOLOR}\n"
 
-echo "Installing External Packages and plugins..."
-
-echo -e "${BLUE}Installing Oh-My-Zh..${ENDCOLOR}"
-exit 0 | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+echo -e "Removing default config files\n"
 echo -e "${BLUE}Removing default .zshrc file"
 ZSHRC_FILE="$HOME/.zshrc"
 if [ -f "$ZSHRC_FILE" ]; then
@@ -173,6 +200,24 @@ if [ -f "$ZSHRC_FILE" ]; then
 else
   echo -e "${BLUE}.zshrc file does not exist.${ENDCOLOR}"
 fi
+echo -e "${BLUE}Removing default .ohmyzsh folder"
+OHMYZSH_FILE="$HOME/.oh-my-zsh"
+if [ -f "$OHMYZSH_FILE" ]; then
+  rm "$OHMYZSH_FILE"
+  if [ $? -eq 0 ]; then
+    echo -e "${GREEN}.oh-my-zsh folder has been successfully deleted.${ENDCOLOR}"
+  else
+    echo -e "${RED}Failed to delete .oh-my-zsh folder.${ENDCOLOR}"
+    exit 1
+  fi
+else
+  echo -e "${BLUE}.oh-my-zsh folder does not exist.${ENDCOLOR}"
+fi
+
+echo "Installing External Packages and plugins..."
+
+echo -e "${BLUE}Installing Oh-My-Zh..${ENDCOLOR}"
+exit 0 | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 echo -e "${BLUE}Installing zsh-autosuggestions..."
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
@@ -204,11 +249,12 @@ fi
 
 echo -e "${GREEN}DONE${ENDCOLOR}: External packages installed successfully.\n"
 
+echo -e "Running stow\n"
 
 # Copy wallpaper image to corresponding directory.
 # This wallpaper is set in the sway configuration,
 # so if this is missing, sway will throw an error.
-if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "fedora" ]]; then
+if [[ $GRAPHICS == true ]]; then
   mkdir -p ~/Pictures/wallpapers
   cp wallpapers/penguin_smiling.jpg -r ~/Pictures/wallpapers/
 
@@ -228,8 +274,8 @@ for dir in "${stow_dirs[@]}"; do
   fi
 done
 
-# If the distro is Ubuntu or Fedora, apply stow for graphical directories
-if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "fedora" || "$DISTRO" == "arch"]]; then
+# Stow for graphical directories
+if [[ $GRAPHICS == true ]]; then
   for dir in "${graphical_stow_dirs[@]}"; do
     if [ -d "$dir" ]; then
       echo -e "${BLUE}Running stow for graphical directory: $dir${ENDCOLOR}"
@@ -254,4 +300,4 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo -e "For all of your configuration to take effect you'll have to log out and log in again."
+echo -e "For all of your configuration to take effect you'll have to log out and log in again.\n"
