@@ -149,7 +149,6 @@ packages=(
   "tree"
   "build-essential"
   "zsh"
-  "neovim"
   "ripgrep"
   "tmux"
 )
@@ -203,6 +202,16 @@ else
 fi
 
 echo "Installing External Packages and plugins..."
+
+echo -e "${BLUE}Installing Neovim...${ENDCOLOR}"
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
+sudo rm -rf /opt/nvim
+sudo tar -C /opt -xzf nvim-linux64.tar.gz
+rm -rf nvim-linux64.tar.gz
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Installing Neovim.${ENDCOLOR}"
+    exit 1
+fi
 
 echo -e "${BLUE}Installing Oh-My-Zh..${ENDCOLOR}"
 exit 0 | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
