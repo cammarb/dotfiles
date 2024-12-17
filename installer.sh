@@ -187,23 +187,11 @@ done
 echo -e "${GREEN}DONE: Packages installed successfully.${ENDCOLOR}\n"
 
 echo -e "Removing default config files\n"
-echo -e "${BLUE}Removing default .zshrc file"
-ZSHRC_FILE="$HOME/.zshrc"
-if [ -f "$ZSHRC_FILE" ]; then
-  rm "$ZSHRC_FILE"
-  if [ $? -eq 0 ]; then
-    echo -e "${GREEN}.zshrc file has been successfully deleted.${ENDCOLOR}"
-  else
-    echo -e "${RED}Failed to delete .zshrc file.${ENDCOLOR}"
-    exit 1
-  fi
-else
-  echo -e "${BLUE}.zshrc file does not exist.${ENDCOLOR}"
-fi
-echo -e "${BLUE}Removing default .ohmyzsh folder"
-OHMYZSH_FILE="$HOME/.oh-my-zsh"
-if [ -f "$OHMYZSH_FILE" ]; then
-  rm "$OHMYZSH_FILE"
+
+echo -e "${BLUE}Removing default .oh-my-zsh folder"
+OHMYZSH_FOLDER="$HOME/.oh-my-zsh"
+if [ -d "$OHMYZSH_FOLDER" ]; then
+  rm -rf "$OHMYZSH_FOLDER"
   if [ $? -eq 0 ]; then
     echo -e "${GREEN}.oh-my-zsh folder has been successfully deleted.${ENDCOLOR}"
   else
@@ -256,10 +244,31 @@ echo -e "Running stow\n"
 # so if this is missing, sway will throw an error.
 if [[ $GRAPHICS == true ]]; then
   mkdir -p ~/Pictures/wallpapers
-  cp wallpapers/penguin_smiling.jpg -r ~/Pictures/wallpapers/
+  cp wallpapers/penguin_smiling.jpg ~/Pictures/wallpapers/
+fi
 
 stow_dirs=("git" "nvim" "tmux" "zsh")
 graphical_stow_dirs=("alacritty" "sway")
+
+echo "Remove .gitconfig to avoid conflict.\n"
+rm -f $HOME/.gitconfig
+
+echo "Remove nvim configuration"
+rm -rf $HOME/.config/nvim
+
+echo -e "${BLUE}Removing default .zshrc file"
+ZSHRC_FILE="$HOME/.zshrc"
+if [ -f "$ZSHRC_FILE" ]; then
+  rm "$ZSHRC_FILE"
+  if [ $? -eq 0 ]; then
+    echo -e "${GREEN}.zshrc file has been successfully deleted.${ENDCOLOR}"
+  else
+    echo -e "${RED}Failed to delete .zshrc file.${ENDCOLOR}"
+    exit 1
+  fi
+else
+  echo -e "${BLUE}.zshrc file does not exist.${ENDCOLOR}"
+fi
 
 for dir in "${stow_dirs[@]}"; do
   if [ -d "$dir" ]; then
@@ -301,3 +310,4 @@ if [ $? -ne 0 ]; then
 fi
 
 echo -e "For all of your configuration to take effect you'll have to log out and log in again.\n"
+
