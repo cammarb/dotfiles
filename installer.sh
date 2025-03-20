@@ -3,29 +3,27 @@
 # =============================================================================
 # Script Name: installer.sh
 # Description: This script installs software and my dotfiles for the specified
-#              environment. 
-#              The script accepts predefined values: 'ubuntu', 'fedora', 'arch' 
-#              If no argument is provided or if the argument is invalid, it 
+#              environment.
+#              The script accepts predefined values: 'ubuntu', 'fedora', 'arch'
+#              If no argument is provided or if the argument is invalid, it
 #              defaults to 'ubuntu'.
 #
 # Usage:
 #   ./installer.sh [value]
 #
 # Arguments:
-#   value   - A string representing the environment. Valid values are 
+#   value   - A string representing the environment. Valid values are
 #             'ubuntu', 'fedora', 'arch'.
 #
 # Example:
 #   ./installer.sh fedora
 # =============================================================================
 
-
 # Console colors
 RED="\e[31m"
 LIGHT_RED="\e[91m"
 GREEN="\e[32m"
 BLUE="\e[34m"
-MAGENTA="\e[35m"
 YELLOW="\e[33m"
 ENDCOLOR="\e[0m"
 
@@ -48,7 +46,7 @@ VALID_DISTROS=(
 is_valid_distro() {
   local value="$1"
   for valid in "${VALID_DISTROS[@]}"; do
-    if [[ "$value" == "$valid" ]]; then
+    if [[ $value == "$valid" ]]; then
       return 0
     fi
   done
@@ -60,17 +58,17 @@ DISTRO="${1:-$DEFAULT_DISTRO}"
 if ! is_valid_distro "$DISTRO"; then
   echo -e "${RED}Invalid distro provided."
   exit 1
-elif [[ -z "$1" ]]; then
+elif [[ -z $1 ]]; then
   DISTRO=$DEFAULT_DISTRO
   echo -e "${YELLOW}No distro provided. Using default: $DEFAULT_DISTRO${ENDCOLOR}"
-  echo "Log: No distro provided. Defaulting to $DEFAULT_DISTRO." >> script.log
+  echo "Log: No distro provided. Defaulting to $DEFAULT_DISTRO." >>script.log
 fi
 
 echo -e "${GREEN}Using distro: $DISTRO${ENDCOLOR}"
 
 is_graphical() {
   local value="$1"
-  if [[ "$value" == "true" || "$value" == "false" ]]; then
+  if [[ $value == "true" || $value == "false" ]]; then
     return 0
   fi
   return 1
@@ -81,33 +79,33 @@ GRAPHICS="${GRAPHICS:-false}"
 if ! is_graphical "$GRAPHICS"; then
   echo -e "${RED}Invalid graphics value provided.${ENDCOLOR}"
   exit 1
-elif [[ -z "$2" ]]; then
+elif [[ -z $2 ]]; then
   echo -e "${YELLOW}No graphics value provided. Using default: $GRAPHICS${ENDCOLOR}"
 else
-  $GRAPHICS=true
+  GRAPHICS=true
   echo -e "${YELLOW}No graphics value provided. Using default: $GRAPHICS${ENDCOLOR}"
 fi
 
 if ! is_valid_distro "$DISTRO"; then
   echo -e "${RED}Invalid distro provided."
   exit 1
-elif [[ -z "$1" ]]; then
+elif [[ -z $1 ]]; then
   DISTRO=$DEFAULT_DISTRO
   echo -e "${YELLOW}No distro provided. Using default: $DEFAULT_DISTRO${ENDCOLOR}"
-  echo "Log: No distro provided. Defaulting to $DEFAULT_DISTRO." >> script.log
+  echo "Log: No distro provided. Defaulting to $DEFAULT_DISTRO." >>script.log
 fi
 
 echo -e "Install with graphical apps: ${YELLOW}$GRAPHICS${ENDCOLOR}"
 
-check_exit_status(){
+check_exit_status() {
   if [ $? -ne 0 ]; then
-      echo -e "${RED}Error: $1 failed to install.${ENDCOLOR}"
-      exit 1
-    fi
+    echo -e "${RED}Error: $1 failed to install.${ENDCOLOR}"
+    exit 1
+  fi
 }
 
 # Update and upgrade the system
-cat << EOF
+cat <<EOF
 Updating package list...
 EOF
 
@@ -116,26 +114,26 @@ echo -e "${LIGHT_RED}WARNING${ENDCOLOR}: You might have to enter your password t
 if [[ $DISTRO == "ubuntu" ]]; then
   sudo apt-get update -y
   if [ $? -ne 0 ]; then
-      echo -e "${RED}Error: apt-get update failed.${ENDCOLOR}"
-      exit 1
+    echo -e "${RED}Error: apt-get update failed.${ENDCOLOR}"
+    exit 1
   fi
 
   sudo apt-get upgrade -y
   if [ $? -ne 0 ]; then
-      echo -e "${RED}Error: apt-get upgrade failed.${ENDCOLOR}"
-      exit 1
+    echo -e "${RED}Error: apt-get upgrade failed.${ENDCOLOR}"
+    exit 1
   fi
 elif [[ $DISTRO == "fedora" ]]; then
   sudo dnf update -y
   if [ $? -ne 0 ]; then
-      echo -e "${RED}Error: dnf update failed.${ENDCOLOR}"
-      exit 1
+    echo -e "${RED}Error: dnf update failed.${ENDCOLOR}"
+    exit 1
   fi
 
   sudo dnf upgrade -y
-  if [ $? -ne 0 ]; then
-      echo -e "${RED}Error: dnf upgrade failed.${ENDCOLOR}"
-      exit 1
+  if [$? -ne 0 ]; then
+    echo -e "${RED}Error: dnf upgrade failed.${ENDCOLOR}"
+    exit 1
   fi
 fi
 
@@ -164,11 +162,11 @@ if [[ $GRAPHICS == true ]]; then
   packages=("${packages[@]}" "${graphical_packages[@]}")
 fi
 
-install_package(){
+install_package() {
   echo -e "${BLUE}Installing $1...${ENDCOLOR}"
-  if [[ "$DISTRO" == "fedora" ]]; then
+  if [[ $DISTRO == "fedora" ]]; then
     sudo dnf install -y $1
-  elif [["$DISTRO" == "arch"]]; then  
+  elif [[ $DISTRO == "arch" ]]; then
     sudo pacman -S -y $1
   else
     sudo apt-get install -y $1
@@ -209,8 +207,8 @@ sudo rm -rf /opt/nvim
 sudo tar -C /opt -xzf nvim-linux64.tar.gz
 rm -rf nvim-linux64.tar.gz
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: Installing Neovim.${ENDCOLOR}"
-    exit 1
+  echo -e "${RED}Error: Installing Neovim.${ENDCOLOR}"
+  exit 1
 fi
 
 echo -e "${BLUE}Installing Oh-My-Zh..${ENDCOLOR}"
@@ -219,29 +217,29 @@ exit 0 | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/m
 echo -e "${BLUE}Installing zsh-autosuggestions..."
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: Installing zsh-autosuggestions failed.${ENDCOLOR}"
-    exit 1
+  echo -e "${RED}Error: Installing zsh-autosuggestions failed.${ENDCOLOR}"
+  exit 1
 fi
 
 echo -e "${BLUE}Installing nvm (Node Version Manager)...${ENDCOLOR}"
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: nvm installation failed.${ENDCOLOR}"
-    exit 1
+  echo -e "${RED}Error: nvm installation failed.${ENDCOLOR}"
+  exit 1
 fi
 
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: Adding nvm to .zshrc failed.${ENDCOLOR}"
-    exit 1
+  echo -e "${RED}Error: Adding nvm to .zshrc failed.${ENDCOLOR}"
+  exit 1
 fi
 
 echo -e "${BLUE}Installing LTS version of Node.JS...${ENDCOLOR}"
 nvm install --lts
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: Installing Node.JS failed.${ENDCOLOR}"
-    exit 1
+  echo -e "${RED}Error: Installing Node.JS failed.${ENDCOLOR}"
+  exit 1
 fi
 
 echo -e "${GREEN}DONE${ENDCOLOR}: External packages installed successfully.\n"
@@ -314,9 +312,8 @@ echo -e "${BLUE}Changing default shell to zsh:${ENDCOLOR}"
 echo -e "You might need to enter your password to make these changes."
 chsh -s $(which zsh)
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: Changing shell to zsh failed.${ENDCOLOR}"
-    exit 1
+  echo -e "${RED}Error: Changing shell to zsh failed.${ENDCOLOR}"
+  exit 1
 fi
 
 echo -e "For all of your configuration to take effect you'll have to log out and log in again.\n"
-
