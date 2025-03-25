@@ -224,7 +224,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 )
 
-if ! "$nvm_init_cmd"; then
+if ! nvm_init_cmd; then
   echo -e "$error_msg: Failed to initialize nvm."
   exit 1
 fi
