@@ -174,7 +174,7 @@ echo -e "$info_msg: Installing external packages and plugins."
 if [[ $distro == "ubuntu" ]]; then
   echo -e "$info_msg: Installing neovim."
   neovim_installer(){
-    curl -lo https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
+    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
   }
   if ! neovim_installer; then
     echo -e "$error_msg: Failed to download neovim"
@@ -187,7 +187,7 @@ if [[ $distro == "ubuntu" ]]; then
     echo -e "$error_msg: Failed to extract neovim"
     exit 1
   fi
-  rm -rf nvim-linux64.tar.gz
+  rm -rf nvim-linux-x86_64.tar.gz
 
   echo -e "$success_msg: neovim installation completed."
 fi
