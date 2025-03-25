@@ -24,9 +24,12 @@ red="\e[31m"
 light_red="\e[91m"
 green="\e[32m"
 blue="\e[34m"
+light_blue="e\[94m"
 yellow="\e[33m"
 endcolor="\e[0m"
 
+info_msg="${light_blue}INFO${endcolor}"
+warn_msg="${yellow}WARNING${endcolor}"
 error_msg="${red}ERROR${endcolor}"
 success_msg="${green}SUCCESS${endcolor}"
 
@@ -68,17 +71,14 @@ echo -e "$success_msg: Using distro $distro"
 
 check_exit_status() {
   if [ $? -ne 0 ]; then
-    echo -e "$error_msg: $1 failed to install."
+    echo -e "$error_msg: $1 Failed to install."
     exit 1
   fi
 }
 
 # Update and upgrade the system
-cat <<EOF
-Updating package list...
-EOF
-
-echo -e "${light_red}WARNING${endcolor}: You might have to enter your password to proceed."
+echo -e "$info_msg: Updating package list."
+echo -e "$warn_msg: You might have to enter your password to proceed."
 
 if [[ $distro == "ubuntu" ]]; then
   if ! sudo apt update -y && sudo apt upgrade; then
@@ -92,8 +92,7 @@ elif [[ $distro == "arch" ]]; then
   fi
 fi
 
-echo ""
-echo "Installing Packages..."
+echo -e "$info_msg: Installing packages."
 
 packages=(
   "stow"
@@ -118,7 +117,7 @@ arch_specific=(
 )
 
 install_package() {
-  echo -e "${blue}Installing $1...${endcolor}"
+  echo -e "$info_msg: Installing $1."
   if [[ $distro == "arch" ]]; then
     sudo pacman -S -y "$1"
   else
@@ -128,118 +127,135 @@ install_package() {
 
 for package in "${packages[@]}"; do
   if ! install_package "$package"; then
-    echo -e "$error_msg: installation failed."
+    echo -e "$error_msg: Installation failed."
     exit 1
   fi
 done
 
-echo -e "installing ubuntu specific packages"
+echo -e "$info_msg: Installing ubuntu specific packages."
 if [[ $distro == "ubuntu" ]]; then
   for package in "${ubuntu_specific[@]}"; do
     if ! sudo apt install -y "$package"; then
-      echo -e "$error_msg: specific packages installation failed."
+      echo -e "$error_msg: Specific packages installation failed."
       exit 1
     fi
   done
 fi
 
-echo -e "installing arch specific packages"
+echo -e "$info_msg: Installing arch specific packages."
 if [[ $distro == "arch" ]]; then
   for package in "${arch_specific[@]}"; do
     if ! sudo pacman -s -y "$package"; then
-      echo -e "$error_msg: specific packages installation failed."
+      echo -e "$error_msg: Specific packages installation failed."
       exit 1
     fi
   done
 fi
 
-echo -e "$success_msg: packages installed successfully.\n"
+echo -e "$success_msg: Packages installed successfully."
 
-echo -e "removing default config files\n"
+echo -e "$info_msg: Removing default config files"
 
-echo -e "${blue}removing default .oh-my-zsh folder"
+echo -e "$info_msg: Removing default .oh-my-zsh folder"
 ohmyzsh_folder="$home/.oh-my-zsh"
 if [ -d "$ohmyzsh_folder" ]; then
   if ! rm -rf "$ohmyzsh_folder"; then
-    echo -e "$error_msg: failed to delete .oh-my-zsh folder."
+    echo -e "$error_msg: Failed to delete .oh-my-zsh folder."
     exit 1
   else
-    echo -e "$success_msg: .oh-my-zsh folder has been deleted successfully."
+    echo -e "$success_msg: .oh-my-zsh folder deleted."
   fi
 else
-  echo -e ".oh-my-zsh folder does not exist."
-  echo -e "continue"
+  echo -e ".oh-my-zsh folder does not exist. Continue."
 fi
 
-echo "installing external packages and plugins..."
+echo -e "$info_msg: Installing external packages and plugins."
 
 if [[ $distro == "ubuntu" ]]; then
-  echo -e "${blue}installing neovim...${endcolor}"
-  if ! curl -lo https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz; then
-    echo -e "$error_msg: failed to download neovim"
+  echo -e "$info_msg: Installing neovim."
+  neovim_installer(){
+    curl -lo https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
+  }
+  if ! neovim_installer; then
+    echo -e "$error_msg: Failed to download neovim"
+    exit 1
   fi
 
   sudo rm -rf /opt/nvim
 
   if ! sudo tar -c /opt -xzf nvim-linux64.tar.gz; then
-    echo -e "$error_msg: failed to extract neovim"
+    echo -e "$error_msg: Failed to extract neovim"
+    exit 1
   fi
   rm -rf nvim-linux64.tar.gz
 
   echo -e "$success_msg: neovim installation completed."
 fi
 
-echo -e "${blue}installing oh-my-zh..${endcolor}"
-exit 0 | sh -c "$(curl -fssl https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-echo -e "${blue}installing zsh-autosuggestions..."
-if ! git clone https://github.com/zsh-users/zsh-autosuggestions "${zsh_custom:-~/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions; then
-  echo -e "$error_msg: installing zsh-autosuggestions failed."
+echo -e "$info_msg: Installing ohmyzhs."
+ohmyzsh_installer(){
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+}
+if ! ohmyzsh_installer; then
+  echo -e "$error_msg: Failed to download ohmyzsh."
   exit 1
 fi
 
-echo -e "${blue}installing nvm (node version manager)...${endcolor}"
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-if [ $? -ne 0 ]; then
-  echo -e "$error_msg: nvm installation failed."
+echo -e "$info_msg: Installing zsh-autosuggestions."
+zshautosuggestions_installer(){
+  git clone https://github.com/zsh-users/zsh-autosuggestions "${zsh_custom:-~/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions
+}
+if ! zshautosuggestions_installer; then
+  echo -e "$error_msg: Failed to install zsh-autosuggestions."
+  exit 1
+fi
+
+echo -e "$info_msg: Installing nvm (node version manager)."
+nvm_installer(){
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+}
+if mvn_installer; then
+  echo -e "$error_msg: Failed to install nvm."
   exit 1
 fi
 
 nvm_init_cmd=$(
-  cat <<eof
-export nvm_dir="$([ -z "${xdg_config_home-}" ] && printf %s "${home}/.nvm" || printf %s "${xdg_config_home}/nvm")"
-[ -s "$nvm_dir/nvm.sh" ] && \. "$nvm_dir/nvm.sh" # this loads nvm
-eof
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 )
 
-if ! nvm_init_cmd; then
-  echo -e "$error_msg: adding nvm to .zshrc failed."
+if ! "$nvm_init_cmd"; then
+  echo -e "$error_msg: Failed to initialize nvm."
   exit 1
 fi
 
-echo -e "${blue}installing lts version of node.js...${endcolor}"
+echo -e "$info_msg: Installing LTS version of node.js."
 
 if ! nvm install --lts; then
-  echo -e "$error_msg: installing node.js failed."
+  echo -e "$error_msg: Failed installing LTS version of node.js."
   exit 1
 fi
 
-echo -e "$success_msg: external packages installed successfully.\n"
+echo -e "$success_msg: External packages installed successfully."
 
-echo -e "running stow\n"
+echo -e "$info_msg: Running stow"
 
 stow_dirs=("nvim" "tmux" "zsh")
 
-echo "remove nvim configuration"
-rm -rf "$home"/.config/nvim
+echo -e "$warn_msg: Removing nvim configuration."
+nvim_configuration_folder="$home/.config/nvim"
+if ! rm -rf "$nvim_configuration_folder"; then
+  echo -e "$error_msg: Failed removing nvim configuration."
+  exit 1
+fi
 
-echo -e "${blue}removing default .zshrc file"
-ZSHRC_FILE="$home/.zshrc"
-if [ -f "$ZSHRC_FILE" ]; then
-  if rm "$ZSHRC_FILE"; then
+echo -e "$warn_msg: Removing default .zshrc file."
+zshrc_file="$home/.zshrc"
+if [ -f "$zshrc_file" ]; then
+  if rm "$zshrc_file"; then
     echo -e "$success_msg: .zshrc file has been successfully deleted."
   else
-    echo -e "$error_msg: failed to delete .zshrc file."
+    echo -e "$error_msg: Failed to delete .zshrc file."
     exit 1
   fi
 else
@@ -248,22 +264,22 @@ fi
 
 for dir in "${stow_dirs[@]}"; do
   if [ -d "$dir" ]; then
-    echo -e "${blue}Running stow for directory: $dir${endcolor}"
+    echo -e "$info_msg: Running stow for directory $dir."
     stow "$dir"
     if [ $? -ne 0 ]; then
-      echo -e "$error_msg: stow operation for $dir failed."
+      echo -e "$error_msg: Stow operation for $dir failed."
       exit 1
     fi
   else
-    echo -e "$error_msg: directory $dir does not exist."
+    echo -e "$error_msg: Directory $dir does not exist."
   fi
 done
 
 # Set zsh as default shell
-echo -e "${blue}Changing default shell to zsh:${endcolor}"
-echo -e "You might need to enter your password to make these changes."
+echo -e "$info_msg: Changing default shell to zsh."
+echo -e "$warn_msg: You might need to enter your password to make these changes."
 
-if chsh -s "$(which zsh)"; then
+if ! chsh -s "$(which zsh)"; then
   echo -e "$error_msg: Changing shell to zsh failed."
   exit 1
 fi
