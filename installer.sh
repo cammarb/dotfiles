@@ -183,7 +183,7 @@ if [[ $distro == "ubuntu" ]]; then
 
   sudo rm -rf /opt/nvim
 
-  if ! sudo tar -c /opt -xzf nvim-linux64.tar.gz; then
+  if ! sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz; then
     echo -e "$error_msg: Failed to extract neovim"
     exit 1
   fi
