@@ -4,48 +4,52 @@
 # Script Name: installer.sh
 # Description: This script installs software and my dotfiles for the specified
 #              environment.
-#              The script accepts predefined values: 'ubuntu', 'fedora', 'arch'
+#              The script accepts predefined values: 'ubuntu', 'arch'
 #              If no argument is provided or if the argument is invalid, it
-#              defaults to 'ubuntu'.
+#              the script won't run.
 #
 # Usage:
 #   ./installer.sh [value]
 #
 # Arguments:
 #   value   - A string representing the environment. Valid values are
-#             'ubuntu', 'fedora', 'arch'.
+#             'ubuntu', 'arch'.
 #
 # Example:
-#   ./installer.sh fedora
+#   ./installer.sh ubuntu
 # =============================================================================
 
 # Console colors
-RED="\e[31m"
-LIGHT_RED="\e[91m"
-GREEN="\e[32m"
-BLUE="\e[34m"
-YELLOW="\e[33m"
-ENDCOLOR="\e[0m"
+red="\e[31m"
+light_red="\e[91m"
+green="\e[32m"
+blue="\e[34m"
+yellow="\e[33m"
+endcolor="\e[0m"
+
+error_msg="${red}ERROR${endcolor}"
+success_msg="${green}SUCCESS${endcolor}"
 
 # Banner
-echo -e "${RED}     _       _    __ _ _"
-echo -e "${LIGHT_RED}  __| | ___ | |_ / _(_) | ___  ___"
-echo -e "${YELLOW} / _\` |/ _ \\| __| |_| | |/ _ \\/ __|"
-echo -e "${GREEN}| (_| | (_) | |_|  _| | |  __/\\__ \\"
-echo -e "${BLUE} \\__,_|\\___/ \\__|_| |_|_|\\___||___/ ${ENDCOLOR}installer\n"
+echo -e "${red}     _       _    __ _ _"
+echo -e "${light_red}  __| | ___ | |_ / _(_) | ___  ___"
+echo -e "${yellow} / _\` |/ _ \\| __| |_| | |/ _ \\/ __|"
+echo -e "${green}| (_| | (_) | |_|  _| | |  __/\\__ \\"
+echo -e "${blue} \\__,_|\\___/ \\__|_| |_|_|\\___||___/ ${endcolor}installer\n"
 echo -e "@cammarb\n\n"
 
 # Setup installer for a specific distro
-DEFAULT_DISTRO="ubuntu"
-VALID_DISTROS=(
+valid_distro=(
   "ubuntu"
-  "fedora"
   "arch"
 )
 
 is_valid_distro() {
   local value="$1"
-  for valid in "${VALID_DISTROS[@]}"; do
+  if [ -z "$value" ]; then
+    return 1
+  fi
+  for valid in "${valid_distro[@]}"; do
     if [[ $value == "$valid" ]]; then
       return 0
     fi
@@ -53,18 +57,14 @@ is_valid_distro() {
   return 1
 }
 
-DISTRO="${1:-$DEFAULT_DISTRO}"
-
-if ! is_valid_distro "$DISTRO"; then
-  echo -e "${RED}Invalid distro provided."
+if ! is_valid_distro "$distro"; then
+  echo -e "$error_msg: Missing or invalid distro provided. Exiting."
   exit 1
-elif [[ -z $1 ]]; then
-  DISTRO=$DEFAULT_DISTRO
-  echo -e "${YELLOW}No distro provided. Using default: $DEFAULT_DISTRO${ENDCOLOR}"
-  echo "Log: No distro provided. Defaulting to $DEFAULT_DISTRO." >>script.log
 fi
 
-echo -e "${GREEN}Using distro: $DISTRO${ENDCOLOR}"
+distro=${1}
+
+echo -e "$success_msg: Using distro $distro"
 
 is_graphical() {
   local value="$1"
@@ -74,32 +74,9 @@ is_graphical() {
   return 1
 }
 
-GRAPHICS="${GRAPHICS:-false}"
-
-if ! is_graphical "$GRAPHICS"; then
-  echo -e "${RED}Invalid graphics value provided.${ENDCOLOR}"
-  exit 1
-elif [[ -z $2 ]]; then
-  echo -e "${YELLOW}No graphics value provided. Using default: $GRAPHICS${ENDCOLOR}"
-else
-  GRAPHICS=true
-  echo -e "${YELLOW}No graphics value provided. Using default: $GRAPHICS${ENDCOLOR}"
-fi
-
-if ! is_valid_distro "$DISTRO"; then
-  echo -e "${RED}Invalid distro provided."
-  exit 1
-elif [[ -z $1 ]]; then
-  DISTRO=$DEFAULT_DISTRO
-  echo -e "${YELLOW}No distro provided. Using default: $DEFAULT_DISTRO${ENDCOLOR}"
-  echo "Log: No distro provided. Defaulting to $DEFAULT_DISTRO." >>script.log
-fi
-
-echo -e "Install with graphical apps: ${YELLOW}$GRAPHICS${ENDCOLOR}"
-
 check_exit_status() {
   if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: $1 failed to install.${ENDCOLOR}"
+    echo -e "$error_msg: $1 failed to install."
     exit 1
   fi
 }
@@ -109,30 +86,16 @@ cat <<EOF
 Updating package list...
 EOF
 
-echo -e "${LIGHT_RED}WARNING${ENDCOLOR}: You might have to enter your password to proceed."
+echo -e "${light_red}WARNING${endcolor}: You might have to enter your password to proceed."
 
-if [[ $DISTRO == "ubuntu" ]]; then
-  sudo apt-get update -y
-  if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: apt-get update failed.${ENDCOLOR}"
+if [[ $distro == "ubuntu" ]]; then
+  if ! sudo apt update -y && sudo apt upgrade; then
+    echo -e "$error_msg: apt-get update failed."
     exit 1
   fi
-
-  sudo apt-get upgrade -y
-  if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: apt-get upgrade failed.${ENDCOLOR}"
-    exit 1
-  fi
-elif [[ $DISTRO == "fedora" ]]; then
-  sudo dnf update -y
-  if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: dnf update failed.${ENDCOLOR}"
-    exit 1
-  fi
-
-  sudo dnf upgrade -y
-  if [$? -ne 0 ]; then
-    echo -e "${RED}Error: dnf upgrade failed.${ENDCOLOR}"
+elif [[ $distro == "arch" ]]; then
+  if ! sudo pacman -Syyu -y; then
+    echo -e "$error_msg: pacman update/upgrade failed."
     exit 1
   fi
 fi
@@ -145,174 +108,171 @@ packages=(
   "git"
   "curl"
   "tree"
-  "build-essential"
   "zsh"
   "ripgrep"
   "tmux"
-)
-
-graphical_packages=(
-  "alacritty"
-  "sway"
-  "wmenu"
+  "xclip"
   "wl-clipboard"
 )
 
-if [[ $GRAPHICS == true ]]; then
-  packages=("${packages[@]}" "${graphical_packages[@]}")
-fi
+ubuntu_specific=(
+  "build-essential"
+)
+
+arch_specific=(
+  "base-devel"
+  "neovim"
+  "ghostty"
+)
 
 install_package() {
-  echo -e "${BLUE}Installing $1...${ENDCOLOR}"
-  if [[ $DISTRO == "fedora" ]]; then
-    sudo dnf install -y $1
-  elif [[ $DISTRO == "arch" ]]; then
-    sudo pacman -S -y $1
+  echo -e "${blue}Installing $1...${endcolor}"
+  if [[ $distro == "arch" ]]; then
+    sudo pacman -S -y "$1"
   else
-    sudo apt-get install -y $1
-  fi
-  if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: Installation of $1 failed.${ENDCOLOR}"
-    exit 1
+    sudo apt install -y "$1"
   fi
 }
 
 for package in "${packages[@]}"; do
-  install_package "$package"
+  if ! install_package "$package"; then
+    echo -e "$error_msg: installation failed."
+    exit 1
+  fi
 done
 
-echo -e "${GREEN}DONE: Packages installed successfully.${ENDCOLOR}\n"
+echo -e "installing ubuntu specific packages"
+if [[ $distro == "ubuntu" ]]; then
+  for package in "${ubuntu_specific[@]}"; do
+    if ! sudo apt install -y "$package"; then
+      echo -e "$error_msg: specific packages installation failed."
+      exit 1
+    fi
+  done
+fi
 
-echo -e "Removing default config files\n"
+echo -e "installing arch specific packages"
+if [[ $distro == "arch" ]]; then
+  for package in "${arch_specific[@]}"; do
+    if ! sudo pacman -s -y "$package"; then
+      echo -e "$error_msg: specific packages installation failed."
+      exit 1
+    fi
+  done
+fi
 
-echo -e "${BLUE}Removing default .oh-my-zsh folder"
-OHMYZSH_FOLDER="$HOME/.oh-my-zsh"
-if [ -d "$OHMYZSH_FOLDER" ]; then
-  rm -rf "$OHMYZSH_FOLDER"
-  if [ $? -eq 0 ]; then
-    echo -e "${GREEN}.oh-my-zsh folder has been successfully deleted.${ENDCOLOR}"
-  else
-    echo -e "${RED}Failed to delete .oh-my-zsh folder.${ENDCOLOR}"
+echo -e "$success_msg: packages installed successfully.\n"
+
+echo -e "removing default config files\n"
+
+echo -e "${blue}removing default .oh-my-zsh folder"
+ohmyzsh_folder="$home/.oh-my-zsh"
+if [ -d "$ohmyzsh_folder" ]; then
+  if ! rm -rf "$ohmyzsh_folder"; then
+    echo -e "$error_msg: failed to delete .oh-my-zsh folder."
     exit 1
+  else
+    echo -e "$success_msg: .oh-my-zsh folder has been deleted successfully."
   fi
 else
-  echo -e "${BLUE}.oh-my-zsh folder does not exist.${ENDCOLOR}"
+  echo -e ".oh-my-zsh folder does not exist."
+  echo -e "continue"
 fi
 
-echo "Installing External Packages and plugins..."
+echo "installing external packages and plugins..."
 
-echo -e "${BLUE}Installing Neovim...${ENDCOLOR}"
-curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
-sudo rm -rf /opt/nvim
-sudo tar -C /opt -xzf nvim-linux64.tar.gz
-rm -rf nvim-linux64.tar.gz
-if [ $? -ne 0 ]; then
-  echo -e "${RED}Error: Installing Neovim.${ENDCOLOR}"
+if [[ $distro == "ubuntu" ]]; then
+  echo -e "${blue}installing neovim...${endcolor}"
+  if ! curl -lo https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz; then
+    echo -e "$error_msg: failed to download neovim"
+  fi
+
+  sudo rm -rf /opt/nvim
+
+  if ! sudo tar -c /opt -xzf nvim-linux64.tar.gz; then
+    echo -e "$error_msg: failed to extract neovim"
+  fi
+  rm -rf nvim-linux64.tar.gz
+
+  echo -e "$success_msg: neovim installation completed."
+fi
+
+echo -e "${blue}installing oh-my-zh..${endcolor}"
+exit 0 | sh -c "$(curl -fssl https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+echo -e "${blue}installing zsh-autosuggestions..."
+if ! git clone https://github.com/zsh-users/zsh-autosuggestions "${zsh_custom:-~/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions; then
+  echo -e "$error_msg: installing zsh-autosuggestions failed."
   exit 1
 fi
 
-echo -e "${BLUE}Installing Oh-My-Zh..${ENDCOLOR}"
-exit 0 | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-echo -e "${BLUE}Installing zsh-autosuggestions..."
-git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-if [ $? -ne 0 ]; then
-  echo -e "${RED}Error: Installing zsh-autosuggestions failed.${ENDCOLOR}"
-  exit 1
-fi
-
-echo -e "${BLUE}Installing nvm (Node Version Manager)...${ENDCOLOR}"
+echo -e "${blue}installing nvm (node version manager)...${endcolor}"
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 if [ $? -ne 0 ]; then
-  echo -e "${RED}Error: nvm installation failed.${ENDCOLOR}"
+  echo -e "$error_msg: nvm installation failed."
   exit 1
 fi
 
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-if [ $? -ne 0 ]; then
-  echo -e "${RED}Error: Adding nvm to .zshrc failed.${ENDCOLOR}"
+nvm_init_cmd=$(
+  cat <<eof
+export nvm_dir="$([ -z "${xdg_config_home-}" ] && printf %s "${home}/.nvm" || printf %s "${xdg_config_home}/nvm")"
+[ -s "$nvm_dir/nvm.sh" ] && \. "$nvm_dir/nvm.sh" # this loads nvm
+eof
+)
+
+if ! nvm_init_cmd; then
+  echo -e "$error_msg: adding nvm to .zshrc failed."
   exit 1
 fi
 
-echo -e "${BLUE}Installing LTS version of Node.JS...${ENDCOLOR}"
-nvm install --lts
-if [ $? -ne 0 ]; then
-  echo -e "${RED}Error: Installing Node.JS failed.${ENDCOLOR}"
+echo -e "${blue}installing lts version of node.js...${endcolor}"
+
+if ! nvm install --lts; then
+  echo -e "$error_msg: installing node.js failed."
   exit 1
 fi
 
-echo -e "${GREEN}DONE${ENDCOLOR}: External packages installed successfully.\n"
+echo -e "$success_msg: external packages installed successfully.\n"
 
-echo -e "Running stow\n"
+echo -e "running stow\n"
 
-# Copy wallpaper image to corresponding directory.
-# This wallpaper is set in the sway configuration,
-# so if this is missing, sway will throw an error.
-if [[ $GRAPHICS == true ]]; then
-  mkdir -p ~/Pictures/wallpapers
-  cp wallpapers/penguin_smiling.jpg ~/Pictures/wallpapers/
-fi
+stow_dirs=("nvim" "tmux" "zsh")
 
-stow_dirs=("git" "nvim" "tmux" "zsh")
-graphical_stow_dirs=("alacritty" "sway")
+echo "remove nvim configuration"
+rm -rf "$home"/.config/nvim
 
-echo "Remove .gitconfig to avoid conflict.\n"
-rm -f $HOME/.gitconfig
-
-echo "Remove nvim configuration"
-rm -rf $HOME/.config/nvim
-
-echo -e "${BLUE}Removing default .zshrc file"
-ZSHRC_FILE="$HOME/.zshrc"
+echo -e "${blue}removing default .zshrc file"
+ZSHRC_FILE="$home/.zshrc"
 if [ -f "$ZSHRC_FILE" ]; then
-  rm "$ZSHRC_FILE"
-  if [ $? -eq 0 ]; then
-    echo -e "${GREEN}.zshrc file has been successfully deleted.${ENDCOLOR}"
+  if rm "$ZSHRC_FILE"; then
+    echo -e "$success_msg: .zshrc file has been successfully deleted."
   else
-    echo -e "${RED}Failed to delete .zshrc file.${ENDCOLOR}"
+    echo -e "$error_msg: failed to delete .zshrc file."
     exit 1
   fi
 else
-  echo -e "${BLUE}.zshrc file does not exist.${ENDCOLOR}"
+  echo -e ".zshrc file does not exist. Skipping."
 fi
 
 for dir in "${stow_dirs[@]}"; do
   if [ -d "$dir" ]; then
-    echo -e "${BLUE}Running stow for directory: $dir${ENDCOLOR}"
+    echo -e "${blue}Running stow for directory: $dir${endcolor}"
     stow "$dir"
     if [ $? -ne 0 ]; then
-      echo -e "${RED}Error: stow operation for $dir failed.${ENDCOLOR}"
+      echo -e "$error_msg: stow operation for $dir failed."
       exit 1
     fi
   else
-    echo -e "${RED}Directory $dir does not exist.${ENDCOLOR}"
+    echo -e "$error_msg: directory $dir does not exist."
   fi
 done
 
-# Stow for graphical directories
-if [[ $GRAPHICS == true ]]; then
-  for dir in "${graphical_stow_dirs[@]}"; do
-    if [ -d "$dir" ]; then
-      echo -e "${BLUE}Running stow for graphical directory: $dir${ENDCOLOR}"
-      stow "$dir"
-      if [ $? -ne 0 ]; then
-        echo -e "${RED}Error: stow operation for $dir failed.${ENDCOLOR}"
-        exit 1
-      fi
-    else
-      echo -e "${RED}Graphical directory $dir does not exist.${ENDCOLOR}"
-    fi
-  done
-fi
-echo -e "${GREEN}Stow initialization complete.${ENDCOLOR}"
-
 # Set zsh as default shell
-echo -e "${BLUE}Changing default shell to zsh:${ENDCOLOR}"
+echo -e "${blue}Changing default shell to zsh:${endcolor}"
 echo -e "You might need to enter your password to make these changes."
-chsh -s $(which zsh)
-if [ $? -ne 0 ]; then
-  echo -e "${RED}Error: Changing shell to zsh failed.${ENDCOLOR}"
+
+if chsh -s "$(which zsh)"; then
+  echo -e "$error_msg: Changing shell to zsh failed."
   exit 1
 fi
 
