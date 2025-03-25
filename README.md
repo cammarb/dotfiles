@@ -3,8 +3,7 @@
 This repository contains my configuration files for various tools and programs, managed using GNU Stow.
 It also contains a script to install all the necessary tools and programs for development on a new computer or VM running Linux.
 
-Currently the installer only works for Ubuntu.
-Fedora and Arch installer TBD
+Currently the installer works for Ubuntu and Arch.
 
 ## Table of Contents
 
@@ -40,4 +39,4 @@ Fedora and Arch installer TBD
 
    **_You might be prompted to enter your password a few times._**
 
-3. **Close and Reopen your terminal**
+3. **Close and Reopen your terminal.** If on a DE, then you need to logout and login again.
