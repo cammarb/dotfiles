@@ -103,7 +103,8 @@ packages=(
   "ripgrep"
   "tmux"
   "xclip"
-  "wl-clipboard"
+  "zip"
+  "unzip"
 )
 
 ubuntu_specific=(
@@ -234,6 +235,25 @@ echo -e "$info_msg: Installing LTS version of node.js."
 if ! nvm install --lts; then
   echo -e "$error_msg: Failed installing LTS version of node.js."
   exit 1
+fi
+
+skdman_installer(){
+  curl -s "https://get.sdkman.io" | bash
+}
+if ! skdman_installer; then
+  echo -e "$error_msg: Failed installing SDKMAN."
+  exit 1
+fi
+
+sdkman_init_cmd(){
+source "/home/lilnoogget/.sdkman/bin/sdkman-init.sh"
+}
+if ! sdkman_init_cmd; then
+  echo -e "$error_msg: Failed initializing SDKMAN."
+fi
+
+if ! sdk install java 21.0.2-open; then
+  echo -e "$error_msg: Failed installing java sdks."
 fi
 
 echo -e "$success_msg: External packages installed successfully."
