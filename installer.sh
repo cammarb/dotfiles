@@ -24,7 +24,7 @@ red="\e[31m"
 light_red="\e[91m"
 green="\e[32m"
 blue="\e[34m"
-light_blue="e\[94m"
+light_blue="\e[94m"
 yellow="\e[33m"
 endcolor="\e[0m"
 
