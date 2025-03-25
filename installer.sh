@@ -284,4 +284,4 @@ if ! chsh -s "$(which zsh)"; then
   exit 1
 fi
 
-echo -e "For all of your configuration to take effect you'll have to log out and log in again.\n"
+echo -e "$info_msg: For all of your configuration to take effect you'll have to log out and log in again.\n"
