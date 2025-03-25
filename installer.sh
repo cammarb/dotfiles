@@ -203,7 +203,7 @@ fi
 
 echo -e "$info_msg: Installing zsh-autosuggestions."
 zshautosuggestions_installer(){
-  git clone https://github.com/zsh-users/zsh-autosuggestions "${zsh_custom:-~/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions
+  git clone https://github.com/zsh-users/zsh-autosuggestions "${zsh_custom:-$HOME/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions
 }
 if ! zshautosuggestions_installer; then
   echo -e "$error_msg: Failed to install zsh-autosuggestions."
