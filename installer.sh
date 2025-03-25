@@ -44,13 +44,15 @@ valid_distro=(
   "arch"
 )
 
+distro=${1}
+
 is_valid_distro() {
   local value="$1"
   if [ -z "$value" ]; then
     return 1
   fi
   for valid in "${valid_distro[@]}"; do
-    if [[ $value == "$valid" ]]; then
+    if [[ "$value" == "$valid" ]]; then
       return 0
     fi
   done
@@ -62,17 +64,7 @@ if ! is_valid_distro "$distro"; then
   exit 1
 fi
 
-distro=${1}
-
 echo -e "$success_msg: Using distro $distro"
-
-is_graphical() {
-  local value="$1"
-  if [[ $value == "true" || $value == "false" ]]; then
-    return 0
-  fi
-  return 1
-}
 
 check_exit_status() {
   if [ $? -ne 0 ]; then
