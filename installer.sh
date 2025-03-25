@@ -154,10 +154,10 @@ fi
 
 echo -e "$success_msg: Packages installed successfully."
 
-echo -e "$info_msg: Removing default config files"
+echo -e "$warn_msg: Removing existing config files."
 
 echo -e "$info_msg: Removing default .oh-my-zsh folder"
-ohmyzsh_folder="$home/.oh-my-zsh"
+ohmyzsh_folder="$HOME/.oh-my-zsh"
 if [ -d "$ohmyzsh_folder" ]; then
   if ! rm -rf "$ohmyzsh_folder"; then
     echo -e "$error_msg: Failed to delete .oh-my-zsh folder."
@@ -243,14 +243,14 @@ echo -e "$info_msg: Running stow"
 stow_dirs=("nvim" "tmux" "zsh")
 
 echo -e "$warn_msg: Removing nvim configuration."
-nvim_configuration_folder="$home/.config/nvim"
+nvim_configuration_folder="$HOME/.config/nvim"
 if ! rm -rf "$nvim_configuration_folder"; then
   echo -e "$error_msg: Failed removing nvim configuration."
   exit 1
 fi
 
 echo -e "$warn_msg: Removing default .zshrc file."
-zshrc_file="$home/.zshrc"
+zshrc_file="$HOME/.zshrc"
 if [ -f "$zshrc_file" ]; then
   if rm "$zshrc_file"; then
     echo -e "$success_msg: .zshrc file has been successfully deleted."
