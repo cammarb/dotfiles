@@ -214,7 +214,7 @@ echo -e "$info_msg: Installing nvm (node version manager)."
 nvm_installer(){
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 }
-if nvm_installer; then
+if ! nvm_installer; then
   echo -e "$error_msg: Failed to install nvm."
   exit 1
 fi
