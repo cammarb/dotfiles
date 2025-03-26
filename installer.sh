@@ -262,7 +262,7 @@ echo -e "$success_msg: External packages installed successfully."
 
 echo -e "$info_msg: Running stow"
 
-stow_dirs=("nvim" "tmux" "zsh")
+stow_dirs=("nvim" "tmux" "zsh" "oh-my-zsh")
 
 echo -e "$warn_msg: Removing nvim configuration."
 nvim_configuration_folder="$HOME/.config/nvim"
