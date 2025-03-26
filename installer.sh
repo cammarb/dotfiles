@@ -245,15 +245,17 @@ if ! skdman_installer; then
   exit 1
 fi
 
-sdkman_init_cmd(){
-source "/home/lilnoogget/.sdkman/bin/sdkman-init.sh"
+sdkman_init_cmd() {
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
 }
 if ! sdkman_init_cmd; then
   echo -e "$error_msg: Failed initializing SDKMAN."
+  exit 1
 fi
 
 if ! sdk install java 21.0.2-open; then
   echo -e "$error_msg: Failed installing java sdks."
+  exit 1
 fi
 
 echo -e "$success_msg: External packages installed successfully."
