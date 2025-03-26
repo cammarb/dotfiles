@@ -174,7 +174,7 @@ echo -e "$info_msg: Installing external packages and plugins."
 
 if [[ $distro == "ubuntu" ]]; then
   echo -e "$info_msg: Installing neovim."
-  neovim_installer(){
+  neovim_installer() {
     curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
   }
   if ! neovim_installer; then
@@ -194,7 +194,7 @@ if [[ $distro == "ubuntu" ]]; then
 fi
 
 echo -e "$info_msg: Installing ohmyzhs."
-ohmyzsh_installer(){
+ohmyzsh_installer() {
   echo "n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 }
 if ! ohmyzsh_installer; then
@@ -203,7 +203,7 @@ if ! ohmyzsh_installer; then
 fi
 
 echo -e "$info_msg: Installing zsh-autosuggestions."
-zshautosuggestions_installer(){
+zshautosuggestions_installer() {
   git clone https://github.com/zsh-users/zsh-autosuggestions "${zsh_custom:-$HOME/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions
 }
 if ! zshautosuggestions_installer; then
@@ -212,7 +212,7 @@ if ! zshautosuggestions_installer; then
 fi
 
 echo -e "$info_msg: Installing nvm (node version manager)."
-nvm_installer(){
+nvm_installer() {
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 }
 if ! nvm_installer; then
@@ -220,9 +220,9 @@ if ! nvm_installer; then
   exit 1
 fi
 
-nvm_init_cmd(){
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+nvm_init_cmd() {
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 }
 
 if ! nvm_init_cmd; then
@@ -237,7 +237,7 @@ if ! nvm install --lts; then
   exit 1
 fi
 
-skdman_installer(){
+skdman_installer() {
   curl -s "https://get.sdkman.io" | bash
 }
 if ! skdman_installer; then
