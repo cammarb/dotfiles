@@ -2,10 +2,17 @@ FROM ubuntu:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y bash sudo
+RUN apt-get update -y && apt-get install -y bash sudo
 
-COPY installer.sh /usr/local/bin/installer.sh
+RUN useradd -m -s /bin/bash docker-user && \
+    echo "docker-user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-RUN chmod +x /usr/local/bin/installer.sh
+WORKDIR /home/docker-user/dotfiles/
 
-CMD ["bash", "/usr/local/bin/installer.sh"]
+COPY . /home/docker-user/dotfiles/
+
+RUN chown -R docker-user:docker-user /home/docker-user/
+
+USER docker-user
+
+RUN ./installer.sh ubuntu || echo 'Installer failed' >> /home/docker-user/install.log
