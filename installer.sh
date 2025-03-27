@@ -4,7 +4,7 @@
 # Script Name: installer.sh
 # Description: This script installs software and my dotfiles for the specified
 #              environment.
-#              The script accepts predefined values: 'ubuntu', 'arch'
+#              The script accepts predefined values: 'arch', 'fedora', 'ubuntu'.
 #              If no argument is provided or if the argument is invalid, it
 #              the script won't run.
 #
@@ -13,7 +13,7 @@
 #
 # Arguments:
 #   value   - A string representing the environment. Valid values are
-#             'ubuntu', 'arch'.
+#             'arch', 'fedora', 'ubuntu'.
 #
 # Example:
 #   ./installer.sh ubuntu
@@ -28,6 +28,7 @@ light_blue="\e[94m"
 yellow="\e[33m"
 endcolor="\e[0m"
 
+# Log messages
 info_msg="${light_blue}INFO${endcolor}"
 warn_msg="${yellow}WARNING${endcolor}"
 error_msg="${red}ERROR${endcolor}"
@@ -41,21 +42,41 @@ echo -e "${green}| (_| | (_) | |_|  _| | |  __/\\__ \\"
 echo -e "${blue} \\__,_|\\___/ \\__|_| |_|_|\\___||___/ ${endcolor}installer\n"
 echo -e "@cammarb\n\n"
 
-# Setup installer for a specific distro
-valid_distro=(
-  "ubuntu"
-  "arch"
-)
-
 distro=${1}
 
+valid_distro=(
+  "arch"
+  "fedora"
+  "ubuntu"
+)
+
+install_cmd() {
+  if [[ $distro == "arch" ]]; then
+    sudo pacman -S -y "$1"
+  elif [[ $distro == "fedora" ]]; then
+    sudo dnf install -y "$1"
+  elif [[ $distro == "ubuntu" ]]; then
+    sudo apt install -y "$1"
+  fi
+}
+
+update_cmd() {
+  if [[ $distro == "arch" ]]; then
+    sudo pacman -Syyu
+  elif [[ $distro == "fedora" ]]; then
+    sudo dnf update -y && sudo dnf upgrade -y
+  elif [[ $distro == "ubuntu" ]]; then
+    sudo apt update -y && sudo apt upgrade -y
+  fi
+}
+
 is_valid_distro() {
-  local value="$1"
-  if [ -z "$value" ]; then
+  local this_distro="$1"
+  if [ -z "$this_distro" ]; then
     return 1
   fi
-  for valid in "${valid_distro[@]}"; do
-    if [[ "$value" == "$valid" ]]; then
+  for distro in "${valid_distro[@]}"; do
+    if [[ "$this_distro" == "$distro" ]]; then
       return 0
     fi
   done
@@ -69,27 +90,13 @@ fi
 
 echo -e "$success_msg: Using distro $distro"
 
-check_exit_status() {
-  if [ $? -ne 0 ]; then
-    echo -e "$error_msg: $1 Failed to install."
-    exit 1
-  fi
-}
-
 # Update and upgrade the system
 echo -e "$info_msg: Updating package list."
 echo -e "$warn_msg: You might have to enter your password to proceed."
 
-if [[ $distro == "ubuntu" ]]; then
-  if ! sudo apt update -y && sudo apt upgrade; then
-    echo -e "$error_msg: apt-get update failed."
-    exit 1
-  fi
-elif [[ $distro == "arch" ]]; then
-  if ! sudo pacman -Syyu -y; then
-    echo -e "$error_msg: pacman update/upgrade failed."
-    exit 1
-  fi
+if ! update_cmd; then
+  echo -e "$error_msg: Update/Upgrade failed."
+  exit 1
 fi
 
 echo -e "$info_msg: Installing packages."
@@ -113,17 +120,12 @@ ubuntu_specific=(
 
 arch_specific=(
   "base-devel"
-  "neovim"
   "ghostty"
 )
 
 install_package() {
   echo -e "$info_msg: Installing $1."
-  if [[ $distro == "arch" ]]; then
-    sudo pacman -S -y "$1"
-  else
-    sudo apt install -y "$1"
-  fi
+  install_cmd "$1"
 }
 
 for package in "${packages[@]}"; do
@@ -133,20 +135,20 @@ for package in "${packages[@]}"; do
   fi
 done
 
-echo -e "$info_msg: Installing ubuntu specific packages."
 if [[ $distro == "ubuntu" ]]; then
+  echo -e "$info_msg: Installing ubuntu specific packages."
   for package in "${ubuntu_specific[@]}"; do
-    if ! sudo apt install -y "$package"; then
+    if ! install_cmd "$package"; then
       echo -e "$error_msg: Specific packages installation failed."
       exit 1
     fi
   done
 fi
 
-echo -e "$info_msg: Installing arch specific packages."
 if [[ $distro == "arch" ]]; then
+  echo -e "$info_msg: Installing arch specific packages."
   for package in "${arch_specific[@]}"; do
-    if ! sudo pacman -s -y "$package"; then
+    if ! install_cmd "$package"; then
       echo -e "$error_msg: Specific packages installation failed."
       exit 1
     fi
@@ -155,9 +157,34 @@ fi
 
 echo -e "$success_msg: Packages installed successfully."
 
-echo -e "$warn_msg: Removing existing config files."
+echo -e "$info_msg: Installing external packages and plugins."
 
-echo -e "$info_msg: Removing default .oh-my-zsh folder"
+# neovim
+echo -e "$info_msg: Installing neovim."
+
+neovim_installer() {
+  rm -rf nvim-linux-x86_64.tar.gz # Removing if the file exists already
+  curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+}
+if ! neovim_installer; then
+  echo -e "$error_msg: Failed to download neovim"
+  exit 1
+fi
+
+sudo rm -rf /opt/nvim # Removing if the file exists already
+
+if ! sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz; then
+  echo -e "$error_msg: Failed to extract neovim"
+  exit 1
+fi
+
+rm -rf nvim-linux-x86_64.tar.gz # Cleanup
+echo -e "$success_msg: neovim installation completed."
+
+# ohmyzsh
+echo -e "$info_msg: Installing ohmyzhs."
+echo -e "$warn_msg: Removing default .oh-my-zsh folder."
+
 ohmyzsh_folder="$HOME/.oh-my-zsh"
 if [ -d "$ohmyzsh_folder" ]; then
   if ! rm -rf "$ohmyzsh_folder"; then
@@ -170,39 +197,31 @@ else
   echo -e ".oh-my-zsh folder does not exist. Continue."
 fi
 
-echo -e "$info_msg: Installing external packages and plugins."
-
-if [[ $distro == "ubuntu" ]]; then
-  echo -e "$info_msg: Installing neovim."
-  neovim_installer() {
-    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-  }
-  if ! neovim_installer; then
-    echo -e "$error_msg: Failed to download neovim"
-    exit 1
-  fi
-
-  sudo rm -rf /opt/nvim
-
-  if ! sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz; then
-    echo -e "$error_msg: Failed to extract neovim"
-    exit 1
-  fi
-  rm -rf nvim-linux-x86_64.tar.gz
-
-  echo -e "$success_msg: neovim installation completed."
-fi
-
-echo -e "$info_msg: Installing ohmyzhs."
 ohmyzsh_installer() {
   echo "n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 }
 if ! ohmyzsh_installer; then
-  echo -e "$error_msg: Failed to download ohmyzsh."
+  echo -e "$error_msg: Failed to install ohmyzsh."
   exit 1
 fi
 
+echo -e "$warn_msg: Removing default .zshrc file."
+
+zshrc_file="$HOME/.zshrc"
+if [ -f "$zshrc_file" ]; then
+  if rm "$zshrc_file"; then
+    echo -e "$success_msg: .zshrc file has been successfully deleted."
+  else
+    echo -e "$error_msg: Failed to delete .zshrc file."
+    exit 1
+  fi
+else
+  echo -e ".zshrc file does not exist. Skipping."
+fi
+
+# zsh-autosuggestions
 echo -e "$info_msg: Installing zsh-autosuggestions."
+
 zshautosuggestions_installer() {
   git clone https://github.com/zsh-users/zsh-autosuggestions "${zsh_custom:-$HOME/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions
 }
@@ -211,7 +230,9 @@ if ! zshautosuggestions_installer; then
   exit 1
 fi
 
+# nvm
 echo -e "$info_msg: Installing nvm (node version manager)."
+
 nvm_installer() {
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 }
@@ -224,7 +245,6 @@ nvm_init_cmd() {
   export NVM_DIR="$HOME/.nvm"
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 }
-
 if ! nvm_init_cmd; then
   echo -e "$error_msg: Failed to initialize nvm."
   exit 1
@@ -237,10 +257,11 @@ if ! nvm install --lts; then
   exit 1
 fi
 
-skdman_installer() {
+# sdkman (java, kotlin)
+sdkman_installer() {
   curl -s "https://get.sdkman.io" | bash
 }
-if ! skdman_installer; then
+if ! sdkman_installer; then
   echo -e "$error_msg: Failed installing SDKMAN."
   exit 1
 fi
@@ -258,6 +279,11 @@ if ! sdk install java 21.0.2-open; then
   exit 1
 fi
 
+if ! sdk install kotlin 2.1.0; then
+  echo -e "$error_msg: Failed installing kotlin."
+  exit 1
+fi
+
 echo -e "$success_msg: External packages installed successfully."
 
 echo -e "$info_msg: Running stow"
@@ -269,19 +295,6 @@ nvim_configuration_folder="$HOME/.config/nvim"
 if ! rm -rf "$nvim_configuration_folder"; then
   echo -e "$error_msg: Failed removing nvim configuration."
   exit 1
-fi
-
-echo -e "$warn_msg: Removing default .zshrc file."
-zshrc_file="$HOME/.zshrc"
-if [ -f "$zshrc_file" ]; then
-  if rm "$zshrc_file"; then
-    echo -e "$success_msg: .zshrc file has been successfully deleted."
-  else
-    echo -e "$error_msg: Failed to delete .zshrc file."
-    exit 1
-  fi
-else
-  echo -e ".zshrc file does not exist. Skipping."
 fi
 
 for dir in "${stow_dirs[@]}"; do
@@ -306,4 +319,4 @@ if ! chsh -s "$(which zsh)"; then
   exit 1
 fi
 
-echo -e "$info_msg: For all of your configuration to take effect you'll have to log out and log in again.\n"
+echo -e "$info_msg: For all of your configuration to take effect you'll have to log out and log in again."
