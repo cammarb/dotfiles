@@ -177,8 +177,15 @@ if ! sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz; then
   echo -e "$error_msg: Failed to extract neovim"
   exit 1
 fi
+# Cleanup
+rm -rf nvim-linux-x86_64.tar.gz
+echo -e "$warn_msg: Removing nvim configuration."
+nvim_configuration_folder="$HOME/.config/nvim"
+if ! rm -rf "$nvim_configuration_folder"; then
+  echo -e "$error_msg: Failed removing nvim configuration."
+  exit 1
+fi
 
-rm -rf nvim-linux-x86_64.tar.gz # Cleanup
 echo -e "$success_msg: neovim installation completed."
 
 # ohmyzsh
@@ -288,33 +295,18 @@ echo -e "$success_msg: External packages installed successfully."
 
 echo -e "$info_msg: Running stow"
 
-stow_dirs=("nvim" "tmux" "zsh" "oh-my-zsh")
+stow_dirs="nvim tmux zsh oh-my-zsh"
 
-echo -e "$warn_msg: Removing nvim configuration."
-nvim_configuration_folder="$HOME/.config/nvim"
-if ! rm -rf "$nvim_configuration_folder"; then
-  echo -e "$error_msg: Failed removing nvim configuration."
+echo -e "$info_msg: Running stow for directories $dir."
+if ! stow "$dir"; then
+  echo -e "$error_msg: Stow operation for $dirs failed."
   exit 1
 fi
 
-for dir in "${stow_dirs[@]}"; do
-  if [ -d "$dir" ]; then
-    echo -e "$info_msg: Running stow for directory $dir."
-    stow "$dir"
-    if [ $? -ne 0 ]; then
-      echo -e "$error_msg: Stow operation for $dir failed."
-      exit 1
-    fi
-  else
-    echo -e "$error_msg: Directory $dir does not exist."
-  fi
-done
-
 # Set zsh as default shell
 echo -e "$info_msg: Changing default shell to zsh."
-echo -e "$warn_msg: You might need to enter your password to make these changes."
 
-if ! chsh -s "$(which zsh)"; then
+if ! sudo usermod -s $(which zsh) $USER; then
   echo -e "$error_msg: Changing shell to zsh failed."
   exit 1
 fi
