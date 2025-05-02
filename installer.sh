@@ -52,7 +52,7 @@ valid_distro=(
 
 install_cmd() {
   if [[ $distro == "arch" ]]; then
-    sudo pacman -S -y "$1"
+    sudo pacman -S --noconfirm "$1"
   elif [[ $distro == "fedora" ]]; then
     sudo dnf install -y "$1"
   elif [[ $distro == "ubuntu" ]]; then
@@ -291,22 +291,29 @@ if ! sdk install kotlin 2.1.0; then
   exit 1
 fi
 
+if ! rm -f ~/.zshrc; then
+  echo -e "$error_msg: Failed to removed auto-created .zshrc file."
+  exit 1
+fi
+
 echo -e "$success_msg: External packages installed successfully."
 
 echo -e "$info_msg: Running stow"
 
-stow_dirs="nvim tmux zsh oh-my-zsh"
+stow_dirs=(nvim tmux zsh oh-my-zsh)
 
-echo -e "$info_msg: Running stow for directories $dir."
-if ! stow "$dir"; then
-  echo -e "$error_msg: Stow operation for $dirs failed."
-  exit 1
-fi
+for dir in "${stow_dirs[@]}"; do
+  echo -e "$info_msg: Running stow for directory $dir."
+  if ! stow "$dir"; then
+    echo -e "$error_msg: Stow operation for $dir failed."
+    exit 1
+  fi
+done
 
 # Set zsh as default shell
 echo -e "$info_msg: Changing default shell to zsh."
 
-if ! sudo usermod -s $(which zsh) $USER; then
+if ! chsh -s $(which zsh); then
   echo -e "$error_msg: Changing shell to zsh failed."
   exit 1
 fi
