@@ -4,8 +4,8 @@
 	name = Camila Martinez
 	email = camilamarb98@gmail.com
 [credential "https://github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
+	helper = cache --timeout 21600	# six hours
+	helper = oauth -device
 [credential "https://gist.github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
+	helper = cache --timeout 21600	# six hours
+	helper = oauth -device

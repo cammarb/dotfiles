@@ -104,6 +104,7 @@ echo -e "$info_msg: Installing packages."
 packages=(
   "stow"
   "git"
+  "git-credential-oauth"
   "curl"
   "tree"
   "zsh"
@@ -300,7 +301,7 @@ echo -e "$success_msg: External packages installed successfully."
 
 echo -e "$info_msg: Running stow"
 
-stow_dirs=(nvim tmux zsh oh-my-zsh)
+stow_dirs=(git nvim tmux zsh oh-my-zsh)
 
 for dir in "${stow_dirs[@]}"; do
   echo -e "$info_msg: Running stow for directory $dir."
