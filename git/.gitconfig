@@ -4,8 +4,8 @@
 	name = Camila Martinez
 	email = camilamarb98@gmail.com
 [credential "https://github.com"]
-	helper = cache --timeout 21600	# six hours
+        helper = /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
 	helper = oauth -device
 [credential "https://gist.github.com"]
-	helper = cache --timeout 21600	# six hours
+        helper = /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
 	helper = oauth -device
