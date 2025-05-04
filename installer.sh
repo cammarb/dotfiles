@@ -301,7 +301,7 @@ echo -e "$success_msg: External packages installed successfully."
 
 echo -e "$info_msg: Running stow"
 
-stow_dirs=(git nvim tmux zsh oh-my-zsh)
+stow_dirs=(git nvim zsh oh-my-zsh)
 
 for dir in "${stow_dirs[@]}"; do
   echo -e "$info_msg: Running stow for directory $dir."
@@ -316,6 +316,13 @@ echo -e "$info_msg: Changing default shell to zsh."
 
 if ! chsh -s $(which zsh); then
   echo -e "$error_msg: Changing shell to zsh failed."
+  exit 1
+fi
+
+# Wallpapers
+echo -e "$info_msg: Copying wallpapers"
+if ! cp -pr /wallpapers ~/Pictures/; then
+  echo -e "$error_msg: Copying wallpaper folder failed."
   exit 1
 fi
 
