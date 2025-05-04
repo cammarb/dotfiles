@@ -14,7 +14,7 @@ set $down j
 set $up k
 set $right l
 # Your preferred terminal emulator
-set $term alacritty
+set $term ghostty
 # Your preferred application launcher
 # Note: pass the final command to swaymsg so that the resulting window can be opened
 # on the original workspace that the command was run on.
@@ -25,7 +25,7 @@ include /etc/sway/config-vars.d/*
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg ~/Pictures/wallpapers/penguin_smiling.jpg fill
+output * bg ~/Pictures/wallpapers/berlin.jpg fill
 #
 # Example configuration:
 #
@@ -35,8 +35,14 @@ output * bg ~/Pictures/wallpapers/penguin_smiling.jpg fill
 output HDMI-A-1 mode 2560x1440@74.983Hz scale 1
 
 
-### Styles - Fonts
-font pango:NotoSansMono Regular 14
+### Styles
+#
+# Fonts
+font pango:NotoSansMono Regular 12
+#
+# Gaps
+gaps inner 10
+
 
 ### Idle configuration
 #
@@ -66,7 +72,7 @@ font pango:NotoSansMono Regular 14
 # Read `man 5 sway-input` for more information about this section.
 input "type:keyboard" {
 	xkb_layout "us"
-	xkb_variant "colemak" 
+	xkb_variant "colemak"
 }
 
 ### Key bindings
