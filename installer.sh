@@ -104,7 +104,6 @@ echo -e "$info_msg: Installing packages."
 packages=(
   "stow"
   "git"
-  "git-credential-oauth"
   "curl"
   "tree"
   "zsh"
@@ -116,6 +115,7 @@ packages=(
 )
 
 ubuntu_specific=(
+  "git-credential-oauth"
   "build-essential"
 )
 
