@@ -12,7 +12,7 @@ Currently the installer works for Arch, Fedora and Ubuntu.
 
 ## Requirements
 
-- git
+- git*
 
   _if not installed, run:_
 
@@ -20,9 +20,10 @@ Currently the installer works for Arch, Fedora and Ubuntu.
   sudo apt install git # Ubuntu
 
   sudo pacman -S git # Arch
-
-  sudo dnf install git # Fedora usually comes with git pre-installed.
   ```
+
+Git is included as a package in the installer. If you don't want to download git separately, you can always just download the repo.
+This would require you to pull the neovim submodule separately though.
 
 ## Installation
 
@@ -47,3 +48,4 @@ Currently the installer works for Arch, Fedora and Ubuntu.
 3. **Close and Reopen your session.**
 
    *On a Desktop Environment you need to logout and login.*
+
