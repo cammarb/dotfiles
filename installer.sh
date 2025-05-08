@@ -187,28 +187,32 @@ echo -e "$info_msg: Installing neovim."
 neovim_installer() {
   rm -rf nvim-linux-x86_64.tar.gz # Removing if the file exists already
   curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+
+  if ! sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz; then
+    echo -e "$error_msg: Failed to extract neovim"
+    exit 1
+  fi
+
+  # Cleanup
+  echo -e "$warn_msg: Removing nvim configuration."
+  nvim_configuration_folder="$HOME/.config/nvim"
+  if ! rm -rf nvim-linux-x86_64.tar.gz && rm -rf "$nvim_configuration_folder"; then
+    echo -e "$error_msg: Failed removing nvim configuration."
+    exit 1
+  fi
+
+  echo -e "$success_msg: neovim installation completed."
 }
-if ! neovim_installer; then
-  echo -e "$error_msg: Failed to download neovim"
-  exit 1
+
+if ! [ -d /opt/nvim-linux-x86_64/ ]; then
+  if ! neovim_installer; then
+    echo -e "$error_msg: Failed to download neovim"
+    exit 1
+  fi
+else 
+  echo -e "info_msg: Neovim is already installed, skipping."
 fi
 
-sudo rm -rf /opt/nvim # Removing if the file exists already
-
-if ! sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz; then
-  echo -e "$error_msg: Failed to extract neovim"
-  exit 1
-fi
-# Cleanup
-rm -rf nvim-linux-x86_64.tar.gz
-echo -e "$warn_msg: Removing nvim configuration."
-nvim_configuration_folder="$HOME/.config/nvim"
-if ! rm -rf "$nvim_configuration_folder"; then
-  echo -e "$error_msg: Failed removing nvim configuration."
-  exit 1
-fi
-
-echo -e "$success_msg: neovim installation completed."
 
 # ohmyzsh
 echo -e "$info_msg: Installing ohmyzhs."
@@ -283,6 +287,10 @@ echo -e "$info_msg: Installing LTS version of node.js."
 
 if ! nvm install --lts; then
   echo -e "$error_msg: Failed installing LTS version of node.js."
+  exit 1
+fi
+if ! npm -g install tree-sitter-cli; then # I need this for latex to work in neovim
+  echo -e "$error_msg: Failed installing tree-sitter-cli."
   exit 1
 fi
 
