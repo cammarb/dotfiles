@@ -4,7 +4,7 @@
 # Script Name: installer.sh
 # Description: This script installs software and my dotfiles for the specified
 #              environment.
-#              The script accepts predefined values: 'arch', 'fedora', 'ubuntu'.
+#              The script accepts predefined values: 'arch', 'ubuntu'.
 #              If no argument is provided or if the argument is invalid, it
 #              the script won't run.
 #
@@ -13,7 +13,7 @@
 #
 # Arguments:
 #   value   - A string representing the environment. Valid values are
-#             'arch', 'fedora', 'ubuntu'.
+#             'arch', 'ubuntu'.
 #
 # Example:
 #   ./installer.sh ubuntu
@@ -42,19 +42,20 @@ echo -e "${green}| (_| | (_) | |_|  _| | |  __/\\__ \\"
 echo -e "${blue} \\__,_|\\___/ \\__|_| |_|_|\\___||___/ ${endcolor}installer\n"
 echo -e "@cammarb\n\n"
 
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "Running on $SCRIPT_DIR"
+
 distro=${1}
 
 valid_distro=(
   "arch"
-  "fedora"
   "ubuntu"
 )
 
 install_cmd() {
   if [[ $distro == "arch" ]]; then
     sudo pacman -S --noconfirm "$1"
-  elif [[ $distro == "fedora" ]]; then
-    sudo dnf install -y "$1"
   elif [[ $distro == "ubuntu" ]]; then
     sudo apt install -y "$1"
   fi
@@ -63,8 +64,6 @@ install_cmd() {
 update_cmd() {
   if [[ $distro == "arch" ]]; then
     sudo pacman -Syyu
-  elif [[ $distro == "fedora" ]]; then
-    sudo dnf update -y && sudo dnf upgrade -y
   elif [[ $distro == "ubuntu" ]]; then
     sudo apt update -y && sudo apt upgrade -y
   fi
@@ -117,6 +116,8 @@ packages=(
 ubuntu_specific=(
   "git-credential-oauth"
   "build-essential"
+  "libsecret-1-0"
+  "libsecret-1-dev"
 )
 
 arch_specific=(
@@ -127,6 +128,17 @@ arch_specific=(
 install_package() {
   echo -e "$info_msg: Installing $1."
   install_cmd "$1"
+}
+
+yay_installer(){
+  git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+  yay -Y --gendb
+  yay -Syu --devel
+  yay -Y --devel --save
+}
+
+git-credential-libsecret_setup(){
+  sudo make /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
 }
 
 for package in "${packages[@]}"; do
@@ -144,6 +156,10 @@ if [[ $distro == "ubuntu" ]]; then
       exit 1
     fi
   done
+  if ! git-credential-libsecret_setup; then
+    echo -e "$error_msg: git-credential-libsecret setup failed."
+    exit 1
+  fi
 fi
 
 if [[ $distro == "arch" ]]; then
@@ -154,6 +170,11 @@ if [[ $distro == "arch" ]]; then
       exit 1
     fi
   done
+  echo -e "$info_msg: Installing yay."
+  if ! yay_installer; then
+      echo -e "$error_msg: yay installation failed."
+      exit 1
+  fi
 fi
 
 echo -e "$success_msg: Packages installed successfully."
@@ -293,7 +314,7 @@ if ! sdk install kotlin 2.1.0; then
 fi
 
 if ! rm -f ~/.zshrc; then
-  echo -e "$error_msg: Failed to removed auto-created .zshrc file."
+  echo -e "$error_msg: Failed to remove auto-created .zshrc file."
   exit 1
 fi
 
@@ -304,8 +325,8 @@ echo -e "$info_msg: Running stow"
 stow_dirs=(git nvim zsh oh-my-zsh)
 
 for dir in "${stow_dirs[@]}"; do
-  echo -e "$info_msg: Running stow for directory $dir."
-  if ! stow "$dir"; then
+  echo -e "$info_msg: Running stow for directory $dir"
+  if ! stow -d "$SCRIPT_DIR" "$dir"; then
     echo -e "$error_msg: Stow operation for $dir failed."
     exit 1
   fi
@@ -321,9 +342,10 @@ fi
 
 # Wallpapers
 echo -e "$info_msg: Copying wallpapers"
-if ! cp -pr /wallpapers ~/Pictures/; then
+if ! cp -pr "$SCRIPT_DIR/wallpapers" "$HOME/Pictures/"; then
   echo -e "$error_msg: Copying wallpaper folder failed."
   exit 1
 fi
 
 echo -e "$info_msg: For all of your configuration to take effect you'll have to log out and log in again."
+
