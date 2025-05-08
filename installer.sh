@@ -231,7 +231,7 @@ else
 fi
 
 ohmyzsh_installer() {
-  echo "n" | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 }
 if ! ohmyzsh_installer; then
   echo -e "$error_msg: Failed to install ohmyzsh."
