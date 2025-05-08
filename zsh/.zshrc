@@ -3,7 +3,7 @@ export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="bash"
 
-plugins=(zsh-autosuggestions git kubectl helm minikube)
+plugins=(zsh-autosuggestions git)
 
 source $ZSH/oh-my-zsh.sh
 
