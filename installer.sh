@@ -196,7 +196,7 @@ fi
 
 echo -e "$info_msg: Running stow"
 
-stow_dirs=(git nvim zsh oh-my-zsh)
+stow_dirs=(git nvim zsh)
 
 for dir in "${stow_dirs[@]}"; do
   echo -e "$info_msg: Running stow for directory $dir"
