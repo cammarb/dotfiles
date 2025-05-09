@@ -105,12 +105,13 @@ packages=(
   "git"
   "curl"
   "tree"
-  "zsh"
   "ripgrep"
   "tmux"
   "xclip"
   "zip"
   "unzip"
+  "zsh"
+  "zsh-autosuggestions"
 )
 
 ubuntu_specific=(
@@ -179,6 +180,32 @@ fi
 
 echo -e "$success_msg: Packages installed successfully."
 
+echo -e "$warn_msg: Removing default .zshrc file."
+
+zshrc_file="$HOME/.zshrc"
+if [ -f "$zshrc_file" ]; then
+  if rm "$zshrc_file"; then
+    echo -e "$success_msg: .zshrc file has been successfully deleted."
+  else
+    echo -e "$error_msg: Failed to delete .zshrc file."
+    exit 1
+  fi
+else
+  echo -e ".zshrc file does not exist. Skipping."
+fi
+
+echo -e "$info_msg: Running stow"
+
+stow_dirs=(git nvim zsh oh-my-zsh)
+
+for dir in "${stow_dirs[@]}"; do
+  echo -e "$info_msg: Running stow for directory $dir"
+  if ! stow -d "$SCRIPT_DIR" "$dir"; then
+    echo -e "$error_msg: Stow operation for $dir failed."
+    exit 1
+  fi
+done
+
 echo -e "$info_msg: Installing external packages and plugins."
 
 # neovim
@@ -214,74 +241,21 @@ else
 fi
 
 
-# ohmyzsh
-echo -e "$info_msg: Installing ohmyzhs."
-echo -e "$warn_msg: Removing default .oh-my-zsh folder."
-
-ohmyzsh_folder="$HOME/.oh-my-zsh"
-if [ -d "$ohmyzsh_folder" ]; then
-  if ! rm -rf "$ohmyzsh_folder"; then
-    echo -e "$error_msg: Failed to delete .oh-my-zsh folder."
-    exit 1
-  else
-    echo -e "$success_msg: .oh-my-zsh folder deleted."
-  fi
-else
-  echo -e ".oh-my-zsh folder does not exist. Continue."
-fi
-
-ohmyzsh_installer() {
- sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-}
-if ! ohmyzsh_installer; then
-  echo -e "$error_msg: Failed to install ohmyzsh."
-  exit 1
-fi
-
-echo -e "$warn_msg: Removing default .zshrc file."
-
-zshrc_file="$HOME/.zshrc"
-if [ -f "$zshrc_file" ]; then
-  if rm "$zshrc_file"; then
-    echo -e "$success_msg: .zshrc file has been successfully deleted."
-  else
-    echo -e "$error_msg: Failed to delete .zshrc file."
-    exit 1
-  fi
-else
-  echo -e ".zshrc file does not exist. Skipping."
-fi
-
-# zsh-autosuggestions
-echo -e "$info_msg: Installing zsh-autosuggestions."
-
-zshautosuggestions_installer() {
-  git clone https://github.com/zsh-users/zsh-autosuggestions "${zsh_custom:-$HOME/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions
-}
-if ! zshautosuggestions_installer; then
-  echo -e "$error_msg: Failed to install zsh-autosuggestions."
-  exit 1
-fi
 
 # nvm
 echo -e "$info_msg: Installing nvm (node version manager)."
 
 nvm_installer() {
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+  # Load nvm immediately so the script can use it
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 }
 if ! nvm_installer; then
   echo -e "$error_msg: Failed to install nvm."
   exit 1
 fi
 
-nvm_init_cmd() {
-  export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-}
-if ! nvm_init_cmd; then
-  echo -e "$error_msg: Failed to initialize nvm."
-  exit 1
-fi
 
 echo -e "$info_msg: Installing LTS version of node.js."
 
@@ -297,17 +271,10 @@ fi
 # sdkman (java, kotlin)
 sdkman_installer() {
   curl -s "https://get.sdkman.io" | bash
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
 }
 if ! sdkman_installer; then
   echo -e "$error_msg: Failed installing SDKMAN."
-  exit 1
-fi
-
-sdkman_init_cmd() {
-  source "$HOME/.sdkman/bin/sdkman-init.sh"
-}
-if ! sdkman_init_cmd; then
-  echo -e "$error_msg: Failed initializing SDKMAN."
   exit 1
 fi
 
@@ -321,24 +288,7 @@ if ! sdk install kotlin 2.1.0; then
   exit 1
 fi
 
-if ! rm -f ~/.zshrc; then
-  echo -e "$error_msg: Failed to remove auto-created .zshrc file."
-  exit 1
-fi
-
 echo -e "$success_msg: External packages installed successfully."
-
-echo -e "$info_msg: Running stow"
-
-stow_dirs=(git nvim zsh oh-my-zsh)
-
-for dir in "${stow_dirs[@]}"; do
-  echo -e "$info_msg: Running stow for directory $dir"
-  if ! stow -d "$SCRIPT_DIR" "$dir"; then
-    echo -e "$error_msg: Stow operation for $dir failed."
-    exit 1
-  fi
-done
 
 # Set zsh as default shell
 echo -e "$info_msg: Changing default shell to zsh."
