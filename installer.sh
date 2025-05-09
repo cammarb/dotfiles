@@ -108,6 +108,7 @@ packages=(
   "ripgrep"
   "tmux"
   "xclip"
+  "wl-clipboard"
   "zip"
   "unzip"
   "zsh"
