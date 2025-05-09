@@ -111,7 +111,6 @@ packages=(
   "zip"
   "unzip"
   "zsh"
-  "zsh-autosuggestions"
 )
 
 ubuntu_specific=(
@@ -240,7 +239,41 @@ else
   echo -e "info_msg: Neovim is already installed, skipping."
 fi
 
+# ohmyzsh
+echo -e "$info_msg: Installing ohmyzhs."
+echo -e "$warn_msg: Removing default .oh-my-zsh folder."
 
+ohmyzsh_folder="$HOME/.oh-my-zsh"
+if [ -d "$ohmyzsh_folder" ]; then
+  if ! rm -rf "$ohmyzsh_folder"; then
+    echo -e "$error_msg: Failed to delete .oh-my-zsh folder."
+    exit 1
+  else
+    echo -e "$success_msg: .oh-my-zsh folder deleted."
+  fi
+else
+  echo -e ".oh-my-zsh folder does not exist. Continue."
+fi
+
+ohmyzsh_installer() {
+ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc
+ stow -d $SCRIPT_DIR oh-my-zsh
+}
+if ! ohmyzsh_installer; then
+  echo -e "$error_msg: Failed to install ohmyzsh."
+  exit 1
+fi
+
+# zsh-autosuggestions
+echo -e "$info_msg: Installing zsh-autosuggestions."
+
+zshautosuggestions_installer() {
+  git clone https://github.com/zsh-users/zsh-autosuggestions "${zsh_custom:-$HOME/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions
+}
+if ! zshautosuggestions_installer; then
+  echo -e "$error_msg: Failed to install zsh-autosuggestions."
+  exit 1
+fi
 
 # nvm
 echo -e "$info_msg: Installing nvm (node version manager)."

@@ -1,33 +1,17 @@
-# Enable colors
-autoload -U colors && colors
+# Path to your oh-my-zsh installation.
+export ZSH="$HOME/.oh-my-zsh"
 
-# Enable autosuggestions
-source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+ZSH_THEME="bash"
 
-# enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
+plugins=(zsh-autosuggestions git)
 
-# Alias
-alias ll='ls -l'
-alias la='ls -la'
-alias l='ls'
+source $ZSH/oh-my-zsh.sh
 
-# Git
-autoload -Uz compinit && compinit
-autoload -Uz vcs_info
-precmd_vcs_info() { vcs_info }
-precmd_functions+=( precmd_vcs_info )
-setopt prompt_subst
-zstyle ':vcs_info:git:*' formats '%F{red}%b%f'
+# User configuration
 
-# Ubuntu Prompt
-PROMPT='%F{green}%n@%m%f:%F{blue}%~%f${vcs_info_msg_0_:+ ${vcs_info_msg_0_} }$ '
+# aliases
+alias vim="nvim"
+alias py="python3"
 
 # Exports
 export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
