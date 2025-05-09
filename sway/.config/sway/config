@@ -38,7 +38,7 @@ output HDMI-A-1 mode 2560x1440@74.983Hz scale 1
 ### Styles
 #
 # Fonts
-font pango:Monospace Regular 12
+font pango:Monospace Regular 11
 #
 # Gaps
 gaps inner 10
