@@ -71,7 +71,6 @@ fi
 # sdkman 
 sdkman_installer() {
   curl -s "https://get.sdkman.io" | bash
-  source "$HOME/.sdkman/bin/sdkman-init.sh"
 }
 if ! sdkman_installer; then
   echo -e "$error_msg: Failed installing SDKMAN."
