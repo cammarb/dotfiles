@@ -1,7 +1,9 @@
 [init]
-        defaultBranch = main
+  defaultBranch = main
+[core]
+  editor = "nvim"
 [user]
-        name = Camila Martinez
-        email = camilamarb98@gmail.com
+  name = Camila Martinez
+  email = camilamarb98@gmail.com
 [credential]
-        helper = /mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe
+  helper = /mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe
