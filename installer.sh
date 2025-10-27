@@ -13,7 +13,7 @@
 #
 # Arguments:
 #   value   - A string representing the environment. Valid values are
-#             'arch', 'fedora', 'ubuntu'.
+#             'arch', 'fedora', 'ubuntu', 'macos'.
 #
 # Example:
 #   ./installer.sh ubuntu
