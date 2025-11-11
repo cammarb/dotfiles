@@ -3,7 +3,7 @@
 This repository contains my configuration files for various tools and programs, managed using GNU Stow.
 It also contains a script to install all the necessary tools and programs for development on a new Linux environment.
 
-Currently the installer works for Arch, Fedora, Ubuntu and MacOS (M Chip).
+Currently, the installer works for Arch, Fedora, Ubuntu and macOS (M Chip).
 
 ## Table of Contents
 

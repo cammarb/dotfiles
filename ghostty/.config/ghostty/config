@@ -1,0 +1,6 @@
+font-size = 15
+
+window-padding-x = 20
+window-padding-y = 20
+
+theme = light:iTerm2 Light Background, dark:iTerm2 Dark Background
