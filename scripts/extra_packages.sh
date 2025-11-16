@@ -71,15 +71,6 @@ if ! nvm_installer; then
   exit 1
 fi
 
-nvm_init_cmd() {
-  export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-}
-if ! nvm_init_cmd; then
-  echo -e "$error_msg: Failed to initialize nvm."
-  exit 1
-fi
-
 # sdkman (java, kotlin)
 sdkman_installer() {
   curl -s "https://get.sdkman.io" | bash
