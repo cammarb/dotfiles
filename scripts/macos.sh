@@ -1,19 +1,27 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
-# Homebrew
+os=${1}
+
+# Package Manager - Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# SDKMAN!
-curl -s "https://get.sdkman.io" | bash
+brew_packages=(
+	"--cask git-credential-manager"
+	"neovim"
+	"stow"
+	"ripgrep"
+	"tmux"
+	"zip"
+	"unzip"
+)
 
-# Git Credential Manager
-brew install --cask git-credential-manager
+source ./packages_installer.sh
 
-# Neovim
-brew install neovim
+install_packages brew_packages
 
 # Node Version Manager (nvm)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 
-# Stow
-brew install stow
+# SDKMAN!
+curl -s "https://get.sdkman.io" | bash
+
