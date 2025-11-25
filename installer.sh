@@ -30,10 +30,10 @@ yellow="\e[33m"
 endcolor="\e[0m"
 
 # Log messages
-info_msg="${light_blue}INFO${endcolor}"
-warn_msg="${yellow}WARNING${endcolor}"
-error_msg="${red}ERROR${endcolor}"
-success_msg="${green}SUCCESS${endcolor}"
+INFO_MSG="${light_blue}INFO${endcolor}"
+readonly WARN_MESSAGE="${yellow}WARNING${endcolor}"
+readonly ERROR_MSG="${red}ERROR${endcolor}"
+readonly SUCCESS_MSG="${green}SUCCESS${endcolor}"
 
 # Banner
 echo -e "${red}     _       _    __ _ _"
@@ -43,43 +43,41 @@ echo -e "${green}| (_| | (_) | |_|  _| | |  __/\\__ \\"
 echo -e "${blue} \\__,_|\\___/ \\__|_| |_|_|\\___||___/ ${endcolor}installer\n"
 echo -e "@cammarb\n\n"
 
-os=${1}
+readonly OS=${1}
+echo "OS: $OS"
 
-valid_os=(
-  "arch"
-  "fedora"
-  "ubuntu"
-  "macos"
-)
-
-echo -e "$info_msg: Installing packages."
-
+echo -e "$INFO_MSG: Installing packages."
 
 install_cmd() {
-  if [[ $os == "macos" ]]; then
-    ./macos.sh "$os"
+  if [[ $OS == "macos" ]]; then
+    source ./scripts/macos.sh 
   else
-    ./linux "$os"
+    source ./scripts/linux.sh
   fi
 }
 
-echo -e "$info_msg: Running stow"
+install_cmd
+
+
+echo -e "$INFO_MSG: Installing extra packages."
+
+echo -e "$INFO_MSG: Running stow"
 
 stow_dirs=(git nvim zsh ghostty)
 
 for dir in "${stow_dirs[@]}"; do
-  echo -e "$info_msg: Running stow for directory $dir."
+  echo -e "$INFO_MSG: Running stow for directory $dir."
   if ! stow "$dir"; then
-    echo -e "$error_msg: Stow operation for $dir failed."
+    echo -e "$ERROR_MSG: Stow operation for $dir failed."
     exit 1
   fi
 done
 
 # Wallpapers
-echo -e "$info_msg: Copying wallpapers"
+echo -e "$INFO_MSG: Copying wallpapers"
 if ! cp -pr /wallpapers ~/Pictures/; then
-  echo -e "$error_msg: Copying wallpaper folder failed."
+  echo -e "$ERROR_MSG: Copying wallpaper folder failed."
   exit 1
 fi
 
-echo -e "$info_msg: For all of your configuration to take effect you'll have to log out and log in again."
+echo -e "$INFO_MSG: For all of your configuration to take effect you'll have to log out and log in again."

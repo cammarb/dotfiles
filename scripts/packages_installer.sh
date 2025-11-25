@@ -1,31 +1,26 @@
 #!/usr/bin/env bash
 
-os=${1}
-
-install_command() {
-  if [[ $os == "arch" ]]; then
-    sudo pacman -S --noconfirm "$1"
-  elif [[ $os == "fedora" ]]; then
-    sudo dnf install -y "$1"
-  elif [[ $os == "ubuntu" ]]; then
-    sudo apt install -y "$1"
-  elif [[ $os == "macos" ]]; then
-    brew install "$1"
-  fi
-}
+if [[ $OS == "arch" ]]; then
+  INSTALL_CMD=(sudo pacman -S --noconfirm)
+elif [[ $OS == "fedora" ]]; then
+  INSTALL_CMD=(sudo dnf install -y)
+elif [[ $OS == "ubuntu" ]]; then
+  INSTALL_CMD=(sudo apt install -y)
+elif [[ $OS == "macos" ]]; then
+  INSTALL_CMD=(brew install)
+fi
 
 install_package() {
-  echo -e "$info_msg: Installing $1."
-  install_command "$1"
+  echo -e "$INFO_MSG: Installing $1."
+  "${INSTALL_CMD[@]}" "$1"
 }
 
 install_packages(){
-  local packages_array="$1"
-  local packages=("${!packages_array}")
+  local packages=("$@")
 
   for package in "${packages[@]}"; do
     if ! install_package "$package"; then
-      echo -e "$error_msg: Installation failed."
+      echo -e "$ERROR_MSG: Installation failed."
       exit 1
     fi
   done

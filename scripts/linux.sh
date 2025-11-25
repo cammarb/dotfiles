@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-distro=${1}
-
 packages=(
   "stow"
   "git"
@@ -10,7 +8,7 @@ packages=(
   "zsh"
   "ripgrep"
   "tmux"
-  "wl-clipboard"
+  "xclip"
   "zip"
   "unzip"
 )
@@ -28,21 +26,21 @@ fedora_specific_packages=(
   "@development-tools"
 )
 
-source ./packages_installer.sh "$distro"
+source ./scripts/packages_installer.sh
 
-install_packages packages
+install_packages "${packages[@]}"
 
-if [[ $distro == "arch" ]]; then
-  echo -e "$info_msg: Installing arch specific packages."
-  install_packages arch_specific_packages
+if [[ $OS == "arch" ]]; then
+  echo -e "$INFO_MSG: Installing arch specific packages."
+  install_packages "${arch_specific_packages[@]"
 fi
 
-if [[ $distro == "fedora" ]]; then
-  echo -e "$info_msg: Installing fedora specific packages."
-  install_packages ubuntu_specific_packages
+if [[ $OS == "fedora" ]]; then
+  echo -e "$INFO_MSG: Installing fedora specific packages."
+  install_packages "${fedora_specific_packages[@]}"
 fi
 
-if [[ $distro == "ubuntu" ]]; then
-  echo -e "$info_msg: Installing ubuntu specific packages."
-  install_packages ubuntu_specific_packages
+if [[ $OS == "ubuntu" ]]; then
+  echo -e "$INFO_MSG: Installing ubuntu specific packages."
+  install_packages "${ubuntu_specific_packages[@]}"
 fi
