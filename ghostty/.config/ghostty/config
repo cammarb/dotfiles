@@ -3,4 +3,7 @@ font-size = 15
 window-padding-x = 20
 window-padding-y = 20
 
+background-opacity = 0.8
+background-blur = true
+
 theme = light:iTerm2 Light Background, dark:iTerm2 Dark Background
