@@ -1,0 +1,10 @@
+font-family = JetBrains Mono
+font-size = 11
+
+theme = light:iTerm2 Light Background, dark:iTerm2 Default
+
+window-padding-x = 8
+window-padding-y = 8
+
+# This will only work in Linux
+gtk-custom-css = ~/.config/ghostty/kde-style.css

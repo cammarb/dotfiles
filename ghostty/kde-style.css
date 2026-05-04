@@ -1,0 +1,12 @@
+tabbox {
+	padding: 0;
+	min-height: 24px;
+}
+
+tab {
+	padding: 2px;
+	margin: 3px;
+	min-height: 22px;
+
+	border-radius: 4px;
+}
