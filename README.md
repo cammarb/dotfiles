@@ -22,7 +22,7 @@ Currently, the installer works for Arch, Fedora, Ubuntu and macOS (M Chip).
 
   sudo pacman -S git # Arch
 
-  sudo dnf install git # Fedora usually comes with git pre-installed.
+  sudo dnf install git # Fedora
   ```
 
   - MacOS:
