@@ -63,7 +63,7 @@ echo -e "$INFO_MSG: Installing extra packages."
 
 echo -e "$INFO_MSG: Running stow"
 
-stow_dirs=(git nvim zsh ghostty)
+stow_dirs=(git zsh dot-config)
 rm ~/.gitconfig
 rm ~/.zshrc
 rm -rf ~/.config/ghostty
@@ -71,6 +71,11 @@ rm -rf ~/.config/nvim
 
 for dir in "${stow_dirs[@]}"; do
   echo -e "$INFO_MSG: Running stow for directory $dir."
+  if [[ "$dir" == "dot-config" ]]; then
+	  stow "$dir" -t $HOME/.config
+  else
+	stow --dotfiles "$dir" -t $HOME
+  fi
   if ! stow "$dir"; then
     echo -e "$ERROR_MSG: Stow operation for $dir failed."
     exit 1
