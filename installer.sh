@@ -64,13 +64,12 @@ echo -e "$INFO_MSG: Installing extra packages."
 echo -e "$INFO_MSG: Running stow"
 
 stow_dirs=(git nvim zsh ghostty)
+rm ~/.gitconfig
+rm ~/.zshrc
+rm -rf ~/.config/ghostty
+rm -rf ~/.config/nvim
 
 for dir in "${stow_dirs[@]}"; do
-  rm ~/.gitconfig
-  rm ~/.zshrc
-  rm -rf ~/.config/ghostty
-  rm -rf ~/.config/nvim
-
   echo -e "$INFO_MSG: Running stow for directory $dir."
   if ! stow "$dir"; then
     echo -e "$ERROR_MSG: Stow operation for $dir failed."
@@ -80,7 +79,7 @@ done
 
 # Wallpapers
 echo -e "$INFO_MSG: Copying wallpapers"
-if ! cp -pr /wallpapers ~/Pictures/; then
+if ! cp -pr wallpapers ~/Pictures/; then
   echo -e "$ERROR_MSG: Copying wallpaper folder failed."
   exit 1
 fi
