@@ -98,4 +98,9 @@ if ! remove_zshrc_file; then
   exit 1
 fi
 
+# Git
+curl -L https://aka.ms/gcm/linux-install-source.sh | sh
+git-credential-manager configure
+git config --global credential.credentialStore secretservice
+
 echo -e "$SUCCESS_MSG: Extra packages installed successfully."

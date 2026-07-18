@@ -7,9 +7,9 @@
         email = 44549364+cammarb@users.noreply.github.com # For work, don't forget to change this value
 [credential]
         credentialStore = secretservice # Linux
+	helper = /usr/local/bin/git-credential-manager
         # credentialStore = keychain # macOS
 
-        helper = /usr/local/bin/git-credential-manager
         # helper = /mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe # Windows WSL
 [core]
         editor = nvim
