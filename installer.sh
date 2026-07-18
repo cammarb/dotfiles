@@ -66,6 +66,7 @@ echo -e "$INFO_MSG: Running stow"
 stow_dirs=(git nvim zsh ghostty)
 
 for dir in "${stow_dirs[@]}"; do
+  rm ~/.gitconfig
   echo -e "$INFO_MSG: Running stow for directory $dir."
   if ! stow "$dir"; then
     echo -e "$ERROR_MSG: Stow operation for $dir failed."

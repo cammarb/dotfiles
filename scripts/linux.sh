@@ -32,7 +32,7 @@ install_packages "${packages[@]}"
 
 if [[ $OS == "arch" ]]; then
   echo -e "$INFO_MSG: Installing arch specific packages."
-  install_packages "${arch_specific_packages[@]"
+  install_packages "${arch_specific_packages[@]}"
 fi
 
 if [[ $OS == "fedora" ]]; then
