@@ -1,0 +1,13 @@
+{
+    "KPackageStructure": "Plasma/Wallpaper",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Google"
+            }
+        ],
+        "Id": "GooglePixel9a",
+        "Name": "Google Pixel 9a"
+    }
+}
+
