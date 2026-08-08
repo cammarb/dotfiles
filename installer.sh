@@ -71,12 +71,13 @@ rm -rf ~/.config/nvim
 
 for dir in "${stow_dirs[@]}"; do
   echo -e "$INFO_MSG: Running stow for directory $dir."
+
   if [[ "$dir" == "dot-config" ]]; then
-	  stow "$dir" -t $HOME/.config
+	  stow "$dir" -t "$HOME/.config"
   else
-	stow --dotfiles "$dir" -t $HOME
+	stow --dotfiles "$dir" -t "$HOME"
   fi
-  if ! stow "$dir"; then
+  if [[ $? -ne 0 ]]; then
     echo -e "$ERROR_MSG: Stow operation for $dir failed."
     exit 1
   fi
