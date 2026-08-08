@@ -7,8 +7,6 @@ packages=(
   "tree"
   "zsh"
   "ripgrep"
-  "tmux"
-  "xclip"
   "zip"
   "unzip"
 )
@@ -24,6 +22,7 @@ arch_specific_packages=(
 
 fedora_specific_packages=(
   "@development-tools"
+  "neovim"
 )
 
 source ./scripts/packages_installer.sh
@@ -44,3 +43,7 @@ if [[ $OS == "ubuntu" ]]; then
   echo -e "$INFO_MSG: Installing ubuntu specific packages."
   install_packages "${ubuntu_specific_packages[@]}"
 fi
+
+# Install extra-packages
+source ./scripts/extra_packages.sh
+

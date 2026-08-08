@@ -1,28 +1,29 @@
 #!/usr/bin/env bash
 
-# Neovim (LINUX ONLY)
-neovim_installer() {
-  echo -e "$INFO_MSG: Installing neovim."
-  rm -rf nvim-linux-x86_64.tar.gz # Removing if the file exists already
-  curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-  sudo rm -rf /opt/nvim
-  sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-
-  neovim_cleanup
-}
-neovim_cleanup(){
-  rm -rf nvim-linux-x86_64.tar.gz
-  echo -e "$warn_msg: Removing nvim configuration."
-  nvim_configuration_folder="$HOME/.config/nvim"
-  rm -rf "$nvim_configuration_folder"
-}
-if [[ $os != "macos" ]]; then
-  if ! neovim_installer; then
-    echo -e "$ERROR_MSG: Failed to install neovim"
-    exit 1
-  fi
-  echo -e "$SUCCESS_MSG: neovim installation completed."
-fi
+# TODO: Configure this installation for Ubuntu
+# Neovim (UBUNTU ONLY)
+#neovim_installer() {
+#  echo -e "$INFO_MSG: Installing neovim."
+#  rm -rf nvim-linux-x86_64.tar.gz # Removing if the file exists already
+#  curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+#  sudo rm -rf /opt/nvim
+#  sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+#
+#  neovim_cleanup
+#}
+#neovim_cleanup(){
+#  rm -rf nvim-linux-x86_64.tar.gz
+#  echo -e "$warn_msg: Removing nvim configuration."
+#  nvim_configuration_folder="$HOME/.config/nvim"
+#  rm -rf "$nvim_configuration_folder"
+#}
+#if [[ $os != "macos" ]]; then
+#  if ! neovim_installer; then
+#    echo -e "$ERROR_MSG: Failed to install neovim"
+#    exit 1
+#  fi
+#  echo -e "$SUCCESS_MSG: neovim installation completed."
+#fi
 
 # ohmyzsh
 ohmyzsh_cleanup(){
@@ -98,7 +99,7 @@ if ! remove_zshrc_file; then
   exit 1
 fi
 
-# Git
+# Git Credential Manager
 curl -L https://aka.ms/gcm/linux-install-source.sh | sh
 git-credential-manager configure
 git config --global credential.credentialStore secretservice
