@@ -1,14 +1,15 @@
 font-family = JetBrains Mono
 font-size = 10
 
-theme = light:iTerm2 Light Background, dark:iTerm2 Default
-
+theme = light:Nvim Light, dark:Nvim Dark
 window-padding-x = 8
 window-padding-y = 8
+
+#background-opacity = 0.9
+#background-blur = true
 
 window-height = 32
 window-width = 125
 
 # This will only work in Linux
-gtk-toolbar-style = flat
 gtk-custom-css = ~/.config/ghostty/kde-style.css

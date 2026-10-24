@@ -1,3 +1,26 @@
+/* light (default) */
+toolbarview {
+	background-color: #dee0e2;
+}
+toolbarview:backdrop {
+	background-color: #eff0f1;
+}
+
+/* dark */
+@media (prefers-color-scheme: dark) {
+	toolbarview {
+		background-color: #292c30;
+	}
+	toolbarview:backdrop {
+		background-color: #202326;
+	}
+}
+
+revealer.raised.top-bar,
+revealer.raised.top-bar tabbar .box {
+	background-color: transparent;
+}
+
 tabbox {
 	padding: 0;
 	min-height: 24px;
