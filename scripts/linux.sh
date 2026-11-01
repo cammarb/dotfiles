@@ -9,6 +9,7 @@ packages=(
   "ripgrep"
   "zip"
   "unzip"
+  "gh"
 )
 
 ubuntu_specific_packages=(
